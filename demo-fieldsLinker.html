@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>P5js</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	
+    <!-- external css -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,500">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	
+    <!-- internal css -->
+	<style>
+	
+	 body{
+		font-family: "Roboto,Helvetica Neue",Helvetica,Arial,sans-serif; 
+	 }
+	 #container{
+		 padding-top: 30px;
+		 padding-left:50px;
+		 width:90%;
+	 }
+	 
+	 
+	h5 {
+		color: #2e44b9;
+		font-weight: bold;
+		font-size: 24px;;
+	}
+	
+	
+	.fieldsLinker div{
+		font-weight:bold;
+	}
+	.fieldsLinker canvas{
+		margin-top:27px;
+				margin-left:0px;
+		padding-left:0px;
+	}
+	
+	.fieldsLinker ul {
+		list-style:none;
+		margin-left:0px;
+		padding-left:0px;
+		font-weight:normal;
+	}
+	.fieldsLinker li {
+		border:solid 1px grey;
+		padding:5px 2px 5px 2px;
+		margin-top:7px;/* à adapter */
+		margin-bottom:8px;/* à adapter */
+		user-select: none;  
+		cursor:pointer;
+	}
+	
+	#bonds{
+		width:600px;
+	}
+	
+	</style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+
+            <div class="navbar-header">
+                <div class="btn-group" style="margin-top: 8px;margin-right:10px;">
+                </div>
+                <a class="navbar-brand" href="#">
+					Experiments with jquery
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+				<li id="fieldLinker" class="active"><a href="#fieldLinker">Field Linker</a></li>
+                <li id="blog"><a href="https://philippemarcmeyer.github.io#jquery">Github Blog</a></li>
+                <li id="repos"><a href="https://github.com//FieldsLinker">Github repos</a></li>
+            </ul>
+        </div>
+    </nav>
+  <div id="container">
+  
+	  
+ <div id="fieldLinkerZone" style="max-width:600px;width:600px;" >
+	  <h5>FieldsLinker</h5>
+	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
+	  <p>I use canvas</p>
+	  </div>
+	  
+	  <div id="bonds" style="height:300px;">
+	
+	  </div>
+		<button type="button" style="margin-left:550px;margin-top:20px;" class="btn fieldLinkerSave btn-sm btn-default">Save</button>
+		<div id="input">
+		
+		</div>
+		<div id="output">
+		
+		</div>
+  </div>
+  
+  
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+      <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+	  <script src="./demo-fieldsLinker.js"></script>
+	  
+	<script>  
+	var fieldLinks;
+		$( document ).ready(function() {
+			var existingLinks = [{"from":"firstName","to":"first_name"}] ;
+			var input = {
+			    "options":{
+					"byName" : true,
+					"className":"fieldsLinker",
+					"cellHeight":39,
+					"List1Width":200,
+					"canvasWidth" : 200,
+					"List2Width":200
+				},
+				"listA":
+					{
+						"name":"columns in files",
+						"list" : [
+							"firstName",
+							"lastName",
+							"phone",
+							"email",
+							"role"						
+						]
+					},
+				"listB":
+					{
+						"name":"Fields available",
+						"list" : [
+							"Id",
+							"Company",
+							"jobTitle",
+							"adress",
+							"first_name",
+							"last_name",
+							"email_adress"
+						]
+					},
+				"existingLinks": existingLinks
+				// ex [{"from":"firstName","to":"first_name"},{"from":2,"to":1}] 
+			};
+			
+		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
+			
+			$("#input").html("input => " + JSON.stringify(existingLinks));
+			$(".fieldLinkerSave").on("click",function(){
+				var results = fieldLinks.fieldsLinker("getLinks");
+				$("#output").html("output => " + JSON.stringify(results));
+			});
+			
+		});
+ 
+
+	 </script>  
+</html>
