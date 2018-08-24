@@ -16,6 +16,7 @@ cellHeight,List1Width,canvasWidth,List2Width and should be calculated
 
 tested only on Chrome ...
 
+https://philippemarcmeyer.github.io/demo-fieldsLinker.html
 
 <pre>
 var fieldLinks;
