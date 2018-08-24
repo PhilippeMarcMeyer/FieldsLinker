@@ -12,7 +12,7 @@ cellHeight,List1Width,canvasWidth,List2Width and should be calculated
 tested only on Chrome ...
 
 
-
+<pre>
 var fieldLinks;
 		$( document ).ready(function() {
 			var existingLinks = [{"from":"firstName","to":"first_name"}] ;
@@ -50,7 +50,7 @@ var fieldLinks;
 						]
 					},
 				"existingLinks": existingLinks
-				// ex [{"from":"firstName","to":"first_name"},{"from":2,"to":1}] 
+
 			};
 			
 		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
@@ -63,3 +63,4 @@ var fieldLinks;
 			
 		});
  
+</pre>
