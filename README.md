@@ -1,14 +1,19 @@
 # FieldsLinker
+
 Allow to make a 1 to 1 link between elements of 2 lists
 
 Given 2 lists : for instance one from a text import, the second listing the fields a db table
+
 the jquery plugin allos you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
 v0.01 : first commit
-TODO : set it responsive, a lot of paraméters that should not be necessary :
+
+TODO : set it responsive, a lot of parameters that should not be necessary :
+
 cellHeight,List1Width,canvasWidth,List2Width and should be calculated
+
 tested only on Chrome ...
 
 
