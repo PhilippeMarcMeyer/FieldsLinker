@@ -38,11 +38,7 @@
 	.fieldsLinker div{
 		font-weight:bold;
 	}
-	.fieldsLinker canvas{
-		margin-top:27px;
-				margin-left:0px;
-		padding-left:0px;
-	}
+
 	
 	.fieldsLinker ul {
 		list-style:none;
@@ -52,7 +48,7 @@
 	}
 	.fieldsLinker li {
 		border:solid 1px grey;
-		padding:5px 2px 5px 2px;
+		padding:5px 2px 5px 8px;
 		margin-top:7px;/* à adapter */
 		margin-bottom:8px;/* à adapter */
 		user-select: none;  
@@ -79,14 +75,14 @@
             <ul class="nav navbar-nav">
 				<li id="fieldLinker" class="active"><a href="#fieldLinker">Field Linker</a></li>
                 <li id="blog"><a href="https://philippemarcmeyer.github.io#jquery">Github Blog</a></li>
-                <li id="repos"><a href="https://github.com//FieldsLinker">Github repos</a></li>
+                <li id="repos"><a href="https://github.com/PhilippeMarcMeyer/FieldsLinker">Github repos</a></li>
             </ul>
         </div>
     </nav>
   <div id="container">
   
 	  
- <div id="fieldLinkerZone" style="max-width:600px;width:600px;" >
+ <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
 	  <h5>FieldsLinker</h5>
 	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
 	  <p>I use canvas</p>
@@ -116,14 +112,12 @@
 	var fieldLinks;
 		$( document ).ready(function() {
 			var existingLinks = [{"from":"firstName","to":"first_name"}] ;
+			//existingLinks = [{"from":0,"to":4}] ;
 			var input = {
 			    "options":{
 					"byName" : true,
-					"className":"fieldsLinker",
-					"cellHeight":39,
-					"List1Width":200,
-					"canvasWidth" : 200,
-					"List2Width":200
+					"className":"fieldsLinker"
+	
 				},
 				"listA":
 					{
