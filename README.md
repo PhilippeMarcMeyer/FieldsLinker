@@ -12,6 +12,10 @@ v0.01 : first commit : todo => parameters should not be necessary cellHeight,Lis
 v0.1  : the lines are drawn while dragging over the canvas and the horizontal middle points of the cells are calculated	
 no parameters anymore
 
+Tested on : Chrome, Firefox, Chromium, IE
+todo : horizontal middle points of the cells are wrong on IE and the canvas zone (between the 2 lists) is selected which is not aesthetic.
+
+
 https://philippemarcmeyer.github.io/demo-fieldsLinker.html
 
 <pre>
