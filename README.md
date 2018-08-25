@@ -8,13 +8,9 @@ the jquery plugin allos you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
-v0.01 : first commit
-
-TODO : set it responsive, a lot of parameters that should not be necessary :
-
-cellHeight,List1Width,canvasWidth,List2Width and should be calculated
-
-tested only on Chrome ...
+v0.01 : first commit : todo => parameters should not be necessary cellHeight,List1Width,canvasWidth,List2Width and should be calculated
+v0.1  : the lines are drawn while dragging over the canvas and the horizontal middle points of the cells are calculated	
+no parameters anymore
 
 https://philippemarcmeyer.github.io/demo-fieldsLinker.html
 
