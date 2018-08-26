@@ -25,8 +25,12 @@ var fieldLinks;
 			var existingLinks = [{"from":"firstName","to":"first_name"}] ;
 			var input = {
 			    "options":{
-					"byName" : true,
-					"className":"fieldsLinker"
+					
+						"lineStyle":"square-ends",
+					"lineColor":"black",
+					"handleColor":"red",
+					"contrast":"#fafaff"
+					
 
 				},
 				"listA":
