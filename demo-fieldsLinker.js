@@ -20,18 +20,18 @@ var ListHeights1 = [];
 var ListHeights2 = [];	
 var move = null;
 var that = null;
-var lineStyle = "straight"; // straight or curve
-
+var lineStyle = "straight"; // straight or square-ends
+var handleColor = "darkblue";
+var lineColor = "black";
 
 
 	
 var draw = function(){
 		
 	canvasCtx.fillStyle = 'white';
-	canvasCtx.strokeStyle = 'black';
+	canvasCtx.strokeStyle = lineColor;
 	canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-	canvasCtx.beginPath(); 
-	
+		
 	linksByOrder.forEach(function(item,i){
 		var _from = item["from"];
 		var _to = item["to"];
@@ -41,11 +41,29 @@ var draw = function(){
 
 		var Bx = canvasWidth;
 		var By = ListHeights2[_to];
+	
+
+		canvasCtx.beginPath(); 
 		
 		canvasCtx.moveTo(Ax, Ay);
-
-		canvasCtx.lineTo(Bx, By);
-		canvasCtx.stroke();
+		
+		if(lineStyle == "square-ends"){
+			canvasCtx.fillStyle = handleColor;
+			canvasCtx.strokeStyle = lineColor;
+			canvasCtx.rect(Ax, Ay-4, 8, 8);
+			canvasCtx.rect(Bx-8, By-4, 8, 8);
+			canvasCtx.fill();
+			
+			canvasCtx.moveTo(Ax+8, Ay);
+			canvasCtx.lineTo(Ax+16, Ay);
+			canvasCtx.lineTo(Bx-16, By);
+			canvasCtx.lineTo(Bx-8, By);
+			canvasCtx.stroke();
+		}else{
+			canvasCtx.lineTo(Bx, By);
+			canvasCtx.stroke();
+		}
+		
 	});
 }
 	
@@ -106,10 +124,17 @@ $.fn.fieldsLinker = function(action,input) {
 			}
 			
 			if(data.options.lineStyle){
-				if(data.options.lineStyle=="curve")
-					lineStyle = "curve";
+				if(data.options.lineStyle=="square-ends")
+					lineStyle = "square-ends";
+			}		
+			
+			if(data.options.lineColor){
+				lineColor = data.options.lineColor;
 			}
 			
+			if(data.options.handleColor){
+				handleColor = data.options.handleColor;
+			}
 			
 
 			$(this).html("");
