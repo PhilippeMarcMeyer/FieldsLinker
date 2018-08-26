@@ -25,11 +25,8 @@ var fieldLinks;
 			var input = {
 			    "options":{
 					"byName" : true,
-					"className":"fieldsLinker",
-					"cellHeight":39,
-					"List1Width":200,
-					"canvasWidth" : 200,
-					"List2Width":200
+					"className":"fieldsLinker"
+
 				},
 				"listA":
 					{
