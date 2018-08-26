@@ -13,7 +13,8 @@ v0.1  : the lines are drawn while dragging over the canvas and the horizontal mi
 no parameters anymore
 
 Tested on : Chrome, Firefox, Chromium, IE, Opéra : OK for Chrome, Firefox and Opera
-todo : horizontal middle points of the cells are wrong on IE and the canvas zone (between the 2 lists) is selected which is not aesthetic.
+todo : horizontal middle points of the cells are wrong on IE 
+and on chromium the canvas zone (between the 2 lists) is selected during the dragging process which is not aesthetic.
 
 
 https://philippemarcmeyer.github.io/demo-fieldsLinker.html
