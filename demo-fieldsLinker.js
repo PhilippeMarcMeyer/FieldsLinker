@@ -21,9 +21,9 @@ var ListHeights2 = [];
 var move = null;
 var that = null;
 var lineStyle = "straight"; // straight or square-ends
-var handleColor = "darkblue";
+var handleColor = "#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC".split(",");
 var lineColor = "black";
-
+var autoDetect = "off";
 
 	
 var draw = function(){
@@ -46,10 +46,11 @@ var draw = function(){
 		canvasCtx.beginPath(); 
 		
 		canvasCtx.moveTo(Ax, Ay);
-		
+	var handleCurrentColor = handleColor[i%handleColor.length];
 		if(lineStyle == "square-ends"){
-			canvasCtx.fillStyle = handleColor;
-			canvasCtx.strokeStyle = lineColor;
+				
+			canvasCtx.fillStyle = handleCurrentColor;
+			canvasCtx.strokeStyle = handleCurrentColor;
 			canvasCtx.rect(Ax, Ay-4, 8, 8);
 			canvasCtx.rect(Bx-8, By-4, 8, 8);
 			canvasCtx.fill();
@@ -60,6 +61,7 @@ var draw = function(){
 			canvasCtx.lineTo(Bx-8, By);
 			canvasCtx.stroke();
 		}else{
+			canvasCtx.strokeStyle = handleCurrentColor;
 			canvasCtx.lineTo(Bx, By);
 			canvasCtx.stroke();
 		}
@@ -70,6 +72,7 @@ var draw = function(){
 
 var makeLink  = function(infos){
 	eraseLinkA(infos.offsetA);
+	eraseLinkB(infos.offsetB);
 	linksByOrder.push({"from":infos.offsetA,"to":infos.offsetB});
 	linksByName.push({"from":infos.nameA,"to":infos.nameB});
 	draw();
@@ -103,9 +106,6 @@ var eraseLinkB = function(offset){
 	}
 }
 
-
-
-
 	
 $.fn.fieldsLinker = function(action,input) {
 
@@ -133,9 +133,13 @@ $.fn.fieldsLinker = function(action,input) {
 			}
 			
 			if(data.options.handleColor){
-				handleColor = data.options.handleColor;
+				handleColor = data.options.handleColor.split(",");
 			}
 			
+			if(data.options.autoDetect){
+				autoDetect = data.options.autoDetect;
+			}
+
 
 			$(this).html("");
 			
@@ -157,7 +161,7 @@ $.fn.fieldsLinker = function(action,input) {
 				.appendTo($main)
 				.addClass("FL-mid")
 				.css({"display":"inline-block","width":"20%"})
-				.html("&nbsp;");
+				.html("<br />");
 				
 				
 			var $rightDiv =  $("<div></div>");
@@ -181,6 +185,15 @@ $.fn.fieldsLinker = function(action,input) {
 					.attr("data-name",x)
 					.text(x);
 			});
+			
+			if(data.options.buttonErase){
+				var $btn =  $("<button></button>");
+				$btn 
+					.appendTo($(this).find(".FL-main"))
+					.attr("type","button")
+					.addClass("btn btn-danger  btn-sm eraseLink")
+					.html(data.options.buttonErase);
+			}
 
 
 			var $ul =  $("<ul></ul>");
@@ -223,9 +236,11 @@ $.fn.fieldsLinker = function(action,input) {
 			
 			// Computing the vertical offset of the middle of each cell.
 			$(this).find(".FL-main .FL-left li").each(function(i){
+				
 				var position = $(this).position();
 				var hInner = $(this).height();
 				var hOuter = $(this).outerHeight();
+				
 				var delta = Math.floor(0.5 + (hOuter - hInner)/2);
 				var midInner = Math.floor(0.5 + hInner/2);
 				var midHeight = position.top + midInner - delta;
@@ -244,7 +259,13 @@ $.fn.fieldsLinker = function(action,input) {
 			});
 			
 			// Listeners :
-			
+			if(data.options.buttonErase){
+				$(this).find(".FL-main .eraseLink").on("click",function(e){
+					linksByOrder.length = 0;
+					linksByName.length = 0;
+					draw();
+				});
+			}
 			// On mousedown in left List : 
 			$(this).find(".FL-main .FL-left li").on("mousedown",function(e){
 				// we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
@@ -292,6 +313,11 @@ $.fn.fieldsLinker = function(action,input) {
 					 var By = ListHeights2[_To];
 					 
 					draw();
+					canvasCtx.beginPath(); 
+					var offset  = linksByOrder.length;
+					var color= handleColor[offset%handleColor.length];
+					canvasCtx.fillStyle = 'white';
+					canvasCtx.strokeStyle = color;
 					
 					canvasCtx.moveTo(Ax, Ay);
 					canvasCtx.lineTo(Bx, By);
@@ -302,15 +328,18 @@ $.fn.fieldsLinker = function(action,input) {
 			// mousemove over the canvas
 			
 			$(this).find("canvas").on("mousemove",function(e){
-				e.stopPropagation();
+	
 				if(move != null){
-					canvasCtx.fillStyle = 'white';
-					canvasCtx.strokeStyle = lineColor;
+
 					canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 					// we redraw all the existing links
 					draw();
+					canvasCtx.beginPath(); 
 					// we draw the new would-be link
-				
+					var offset  = linksByOrder.length;
+					var color= handleColor[offset%handleColor.length];
+					canvasCtx.fillStyle = 'white';
+					canvasCtx.strokeStyle = color;
 					var _from = move.offsetA;
 					
 					var Ax = 0;
@@ -333,32 +362,78 @@ $.fn.fieldsLinker = function(action,input) {
 				}
 					
 			});
-			data.existingLinks.forEach(function(link){
-					var pos = -1;
-					if(byName){
-						var offA = List1.indexOf(link["from"]);
-						var offB = List2.indexOf(link["to"]);
-						if(offA !=-1 && offB!=-1){
-							var linkWithOffset = {
-								"from": offA,
-								"to": offB,
+			
+			if(data.existingLinks){
+				data.existingLinks.forEach(function(link){
+						var pos = -1;
+						if(byName){
+							var offA = List1.indexOf(link["from"]);
+							var offB = List2.indexOf(link["to"]);
+							if(offA !=-1 && offB!=-1){
+								var linkWithOffset = {
+									"from": offA,
+									"to": offB,
+								}
+								linksByName.push(link);
+								linksByOrder.push(linkWithOffset);
 							}
-							linksByName.push(link);
-							linksByOrder.push(linkWithOffset);
+						}else{
+							var offA = link["from"];
+							var offB = link["to"];
+							if(offA < List1.length && offB < List2.length){
+								var linkWithNames = {
+									"from":List1[offA],
+									"to": List2[offB]
+								}
+							linksByOrder.push(link);
+							linksByName.push(linkWithNames);				
+							}
 						}
+				});
+			}	
+			
+			if(autoDetect=="on"){
+				
+				
+				List1.forEach(function(name,i){
+					var nameA = name.toLowerCase().replace(/[^a-z]+/g, '');
+					if (!Array.prototype.findIndex){ // for IE
+						var result = -1;
+						List2.forEach(function(x,j){
+							if(result==-1){
+								var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
+								if(nameA == nameB){
+									result = j;
+								}else if(nameA == nameB.substring(0,nameA.length)){
+									result = j;
+								}
+							}
+						});
 					}else{
-						var offA = link["from"];
-						var offB = link["to"];
-						if(offA < List1.length && offB < List2.length){
-							var linkWithNames = {
-								"from":List1[offA],
-								"to": List2[offB]
-							}
-						linksByOrder.push(link);
-						linksByName.push(linkWithNames);				
+						var result = List2.findIndex(function(x){
+						var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
+						if(nameA == nameB){
+							return true;
+						}else{
+							return nameA == nameB.substring(0,nameA.length);
 						}
+						
+					});	
 					}
-			});
+
+					if(result!=-1){
+						var infos = {};
+						 infos.offsetA = i;
+						 infos.nameA = name;
+						 infos.offsetB = result;
+						 infos.nameB =List2[result];
+						
+						makeLink(infos);
+					}
+					
+				});
+
+			}
 			
 			that = this; // keep the context for listeners
 			

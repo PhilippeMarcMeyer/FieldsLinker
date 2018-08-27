@@ -26,7 +26,7 @@
 		 padding-left:50px;
 		 width:90%;
 	 }
-	 
+
 	 
 	h5 {
 		color: #2e44b9;
@@ -34,11 +34,10 @@
 		font-size: 24px;;
 	}
 	
-	
+	/* fieldsLinker */
 	.fieldsLinker div{
 		font-weight:bold;
 	}
-
 	
 	.fieldsLinker ul {
 		list-style:none;
@@ -51,12 +50,17 @@
 		padding:5px 2px 5px 8px;
 		margin-top:7px;/* à adapter */
 		margin-bottom:8px;/* à adapter */
-		user-select: none;  
+	   user-select: none;
+	   -moz-user-select: none;
+	   -webkit-user-select: none;
+	   -ms-user-select: none;
 		cursor:pointer;
 	}
+	/* ---------- */
 	
 	#bonds{
 		width:600px;
+		min-height:410px;
 	}
 	
 	</style>
@@ -85,15 +89,31 @@
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
 	  <h5>FieldsLinker</h5>
 	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
-	  <p>I use canvas</p>
-	   <p ><input type="radio" name="lineStyle" value="straight">Straight</input> <input type="radio" checked name="lineStyle" value="square-ends">Square-ends</input></p><br />
+	  <ul>
+	  <li>You can choose beetween an output with positions or names</li>
+	  <li>Colours can be re-defined and lines come in 2 flavours</li>
+	  <li>You may input somme links from a previous session</li>
+	  <li>Auto-detect feature helps you find part of the links (optional)</li>
+	  <li>Works in Chrome, Chromium, Opera, Firefox and IE (9+)</li>
+	   </ul>
+	    <hr/>	
+		<div class="btn-group btn-group-toggle" data-toggle="radio">
+			<label class="active">
+			<input type="radio" name="lineStyle" id="lineStyle1" value="square-ends" autocomplete="off" checked> Square on ends
+			</label>&nbsp;
+			<label class="">
+			<input type="radio" name="lineStyle" id="lineStyle2" value="straight" autocomplete="off"> Straight line
+			</label>
+		</div>	   
+	  	
 	  </div>
-	  
-	  <div id="bonds" style="height:300px;">
+	     <hr/>	  
+	  <div id="bonds">
 	
 	  </div>
-	 
-		<button type="button" style="margin-left:550px;margin-top:20px;" class="btn fieldLinkerSave btn-sm btn-default">Save</button>
+	 <hr/>
+		<button type="button" class="btn fieldLinkerSave btn-sm btn-primary">Save links</button>
+		<br /><br />
 		<div id="input">
 		
 		</div>
@@ -113,16 +133,14 @@
 	<script>  
 	var fieldLinks;
 		$( document ).ready(function() {
-			var existingLinks = [{"from":"firstName","to":"first_name"}] ;
+			//var existingLinks = [{"from":"firstName","to":"first_name"}] ;
 			//existingLinks = [{"from":0,"to":4}] ;
 			var input = {
 			    "options":{
 					"byName" : true,
-					"className":"fieldsLinker",
 					"lineStyle":"square-ends",
-					"lineColor":"black",
-					"handleColor":"red",
-					"contrast":"#fafaff"
+					"buttonErase":"Erase Links",
+					"autoDetect":"on"
 				},
 				"listA":
 					{
@@ -132,7 +150,10 @@
 							"lastName",
 							"phone",
 							"email",
-							"role"						
+							"role",
+							"Birthday",
+							"Adress",
+							"Sales"
 						]
 					},
 				"listB":
@@ -142,20 +163,22 @@
 							"Id",
 							"Company",
 							"jobTitle",
-							"adress",
+							"adress 1",	
+							"adress 2",	
 							"first_name",
 							"last_name",
 							"email_adress",
-							"telephone"
+							"Phone number"
 						]
 					},
-				"existingLinks": existingLinks
+				//"existingLinks": existingLinks
 				// ex [{"from":"firstName","to":"first_name"},{"from":2,"to":1}] 
 			};
 			
 		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
 			
-			$("#input").html("input => " + JSON.stringify(existingLinks));
+			//$("#input").html("input => " + JSON.stringify(existingLinks));
+			
 			$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");
 				$("#output").html("output => " + JSON.stringify(results));
