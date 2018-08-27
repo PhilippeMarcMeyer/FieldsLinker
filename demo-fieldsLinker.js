@@ -27,7 +27,7 @@ var lineColor = "black";
 
 	
 var draw = function(){
-		
+	canvasCtx.beginPath(); 
 	canvasCtx.fillStyle = 'white';
 	canvasCtx.strokeStyle = lineColor;
 	canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -266,7 +266,9 @@ $.fn.fieldsLinker = function(action,input) {
 			$(this).find(".FL-main .FL-right li").on("mouseup",function(e){
 				 if(move == null){ // no drag 
 					 eraseLinkB($(this).data("offset")); // we erase an existing link if any
+					 draw();
 				 }else{ // we finish a drag then get the infos an create a link
+					 eraseLinkB($(this).data("offset")); // we erase an existing link if any
 					 move.offsetB = $(this).data("offset");
 					 move.nameB = $(this).data("name");
 					 var infos =  JSON.parse(JSON.stringify(move));
@@ -277,6 +279,7 @@ $.fn.fieldsLinker = function(action,input) {
 			
 			// mousemove over a right cell
 			$(this).find(".FL-main .FL-right li").on("mousemove",function(e){
+					
 				 if(move != null){ // drag occuring
 		
 					 var _from = move.offsetA;
@@ -299,7 +302,11 @@ $.fn.fieldsLinker = function(action,input) {
 			// mousemove over the canvas
 			
 			$(this).find("canvas").on("mousemove",function(e){
+				e.stopPropagation();
 				if(move != null){
+					canvasCtx.fillStyle = 'white';
+					canvasCtx.strokeStyle = lineColor;
+					canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 					// we redraw all the existing links
 					draw();
 					// we draw the new would-be link
@@ -326,9 +333,6 @@ $.fn.fieldsLinker = function(action,input) {
 				}
 					
 			});
-			
-			
-			
 			data.existingLinks.forEach(function(link){
 					var pos = -1;
 					if(byName){
@@ -377,6 +381,31 @@ $.fn.fieldsLinker = function(action,input) {
 		  }
 		}else{
 			return [];
+		}
+	}else if( action === "changeParameters" ) {
+		if(!onError){
+			if(input){
+				var options = JSON.parse(JSON.stringify(input));
+				if(options.className){
+					className = options.className;
+				}
+				if(options.byName){
+					byName = options.byName;
+				}
+				
+				if(options.lineStyle){
+						lineStyle =options.lineStyle;
+				}		
+				
+				if(options.lineColor){
+					lineColor = options.lineColor;
+				}
+				
+				if(options.handleColor){
+					handleColor = options.handleColor;
+				}
+			}
+		draw();
 		}
 	}else{
 		onError = true;

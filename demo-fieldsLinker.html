@@ -86,11 +86,13 @@
 	  <h5>FieldsLinker</h5>
 	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
 	  <p>I use canvas</p>
+	   <p ><input type="radio" name="lineStyle" value="straight">Straight</input> <input type="radio" checked name="lineStyle" value="square-ends">Square-ends</input></p><br />
 	  </div>
 	  
 	  <div id="bonds" style="height:300px;">
 	
 	  </div>
+	 
 		<button type="button" style="margin-left:550px;margin-top:20px;" class="btn fieldLinkerSave btn-sm btn-default">Save</button>
 		<div id="input">
 		
@@ -161,6 +163,10 @@
 			
 		});
  
-
+		$("input[type='radio'").on("click",function(){
+			var lineStyle = $("input[name='lineStyle']:checked").val();
+			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":lineStyle});
+		});
+		
 	 </script>  
 </html>
