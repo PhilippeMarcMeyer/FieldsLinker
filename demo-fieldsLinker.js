@@ -439,7 +439,7 @@ $.fn.fieldsLinker = function(action,input) {
 			that = this; // keep the context for listeners
 			
 			$(window).resize(function() {
-				canvasWidth = $(".FL-main .FL-mid").width();
+				canvasWidth = $(that).find(".FL-main .FL-mid").width();
 				canvasPtr.width = canvasWidth;
 				$("#"+canvasId).css("width",canvasWidth+"px");
 	
