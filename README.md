@@ -8,6 +8,9 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
+v0.3 :
+FieldsLinker becomes responsive !
+
 v0.2 :
 You can choose beetween an output with positions or names
 Colours can be re-defined and lines come in 2 flavours

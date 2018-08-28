@@ -326,6 +326,7 @@ $.fn.fieldsLinker = function(action,input) {
 			});
 			
 			// mousemove over the canvas
+
 			
 			$(this).find("canvas").on("mousemove",function(e){
 	
@@ -438,7 +439,11 @@ $.fn.fieldsLinker = function(action,input) {
 			that = this; // keep the context for listeners
 			
 			$(window).resize(function() {
-			   draw();
+				canvasWidth = $(".FL-main .FL-mid").width();
+				canvasPtr.width = canvasWidth;
+				$("#"+canvasId).css("width",canvasWidth+"px");
+	
+				draw();
 			});
 
 			draw();
