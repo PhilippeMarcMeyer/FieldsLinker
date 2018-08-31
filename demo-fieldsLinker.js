@@ -1,3 +1,8 @@
+/* 
+ Copyright (C) Philippe Meyer 2018
+ Distributed under the MIT License
+ fieldsLinker v 0.41 
+*/
 
 (function ( $ ) {
 	const errMsg  = "fieldsLinker error : "
@@ -37,16 +42,9 @@
 			return a["from"] >= b["from"];
 		});
 		
-		var colorOffset = -1;
-		var linkALastFrom = -1;
 		links.forEach(function(item,i){
 			var _from = item["from"];
 			var _to = item["to"];
-			
-			if(_from != linkALastFrom){
-				linkALastFrom = _from;
-				colorOffset ++;
-			}
 			
 			var Ax = 0;
 			var Ay = ListHeights1[_from];
@@ -57,7 +55,7 @@
 			canvasCtx.beginPath(); 
 			
 			canvasCtx.moveTo(Ax, Ay);
-			var handleCurrentColor = handleColor[colorOffset%handleColor.length];
+			var handleCurrentColor = handleColor[_from%handleColor.length];
 			if(lineStyle == "square-ends"){
 				canvasCtx.fillStyle = handleCurrentColor;
 				canvasCtx.strokeStyle = handleCurrentColor;
@@ -341,8 +339,7 @@
 						 
 						draw();
 						canvasCtx.beginPath(); 
-						var offset  = linksByOrder.length;
-						var color= handleColor[offset%handleColor.length];
+						var color= handleColor[_from%handleColor.length];
 						canvasCtx.fillStyle = 'white';
 						canvasCtx.strokeStyle = color;
 						
@@ -360,11 +357,10 @@
 						draw();
 						canvasCtx.beginPath(); 
 						// we draw the new would-be link
-						var offset  = linksByOrder.length;
-						var color= handleColor[offset%handleColor.length];
+						var _from = move.offsetA;
+						var color= handleColor[_from%handleColor.length];
 						canvasCtx.fillStyle = 'white';
 						canvasCtx.strokeStyle = color;
-						var _from = move.offsetA;
 						
 						var Ax = 0;
 						var Ay = ListHeights1[_from];

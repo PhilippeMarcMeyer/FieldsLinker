@@ -8,6 +8,8 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
+v 0.41 : the colors don't change when links are deleted and the color of the link while drawing is consistent with the final result
+
 v0.4 : new option allowing to link one to many
 
 v0.3 :
