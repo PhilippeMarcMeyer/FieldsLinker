@@ -12,6 +12,8 @@
     <!-- external css -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,500">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 	
@@ -63,7 +65,13 @@
 		width : 50%;
 		min-height:410px;
 	}
-	
+	 
+	 .lavender{
+		background-color:#E6E6FA;
+		padding: 5px 8px 2px 8px;
+		border-radius:2px;
+		min-width:300px;
+	 }
 	</style>
   </head>
   <body>
@@ -88,8 +96,9 @@
   
 	  
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
-	  <h5>FieldsLinker</h5>
+	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.4
 	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
+	  <p>New in v0.4 : new option allowing to link one to many</p>
 	  <ul>
 	  <li>You can choose beetween an output with positions or names</li>
 	  <li>Colours can be re-defined and lines come in 2 flavours</li>
@@ -98,15 +107,28 @@
 	  <li>Works in Chrome, Chromium, Opera, Firefox and IE (9+)</li>
 	   </ul>
 	    <hr/>	
-		<div class="btn-group btn-group-toggle" data-toggle="radio">
-			<label class="active">
-			<input type="radio" name="lineStyle" id="lineStyle1" value="square-ends" autocomplete="off" checked> Square on ends
-			</label>&nbsp;
-			<label class="">
-			<input type="radio" name="lineStyle" id="lineStyle2" value="straight" autocomplete="off"> Straight line
-			</label>
-		</div>	   
-	  	
+		<div class="row">
+			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				<div class="btn-group btn-group-toggle lavender" data-toggle="radio">
+					<label class="active">
+					<input type="radio" name="lineStyle" id="lineStyle1" value="square-ends" autocomplete="off" checked> Square on ends
+					</label>&nbsp;
+					<label class="">
+					<input type="radio" name="lineStyle" id="lineStyle2" value="straight" autocomplete="off"> Straight line
+					</label>
+				</div>	
+			</div>	
+			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				<div class="btn-group btn-group-toggle lavender" data-toggle="radio">
+					<label class="active">
+					<input type="radio" name="oneToMany" id="oneToManyOff" value="off" autocomplete="off" checked> One to One
+					</label>&nbsp;
+					<label class="">
+					<input type="radio" name="oneToMany" id="oneToManyOn" value="on" autocomplete="off"> One to Many
+					</label>
+				</div>	
+			</div>				
+	  	</div>	  
 	  </div>
 	     <hr/>	  
 	  <div id="bonds">
@@ -191,6 +213,14 @@
 			var lineStyle = $("input[name='lineStyle']:checked").val();
 			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":lineStyle});
 		});
+		$("#oneToManyOff").on("click",function(){
+			fieldLinks.fieldsLinker("changeParameters",{"oneToMany":"off"});
+		});
+		
+		$("#oneToManyOn").on("click",function(){
+			fieldLinks.fieldsLinker("changeParameters",{"oneToMany":"on"});
+		});
+		
 		
 	 </script>  
 </html>

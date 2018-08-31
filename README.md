@@ -8,6 +8,8 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
+v0.4 : new option allowing to link one to many
+
 v0.3 :
 FieldsLinker becomes responsive !
 
