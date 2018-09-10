@@ -17,6 +17,9 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 	
+	<link rel="stylesheet" href="./fieldsLinker.css">
+
+	
     <!-- internal css -->
 	<style>
 	
@@ -36,28 +39,7 @@
 		font-size: 24px;;
 	}
 	
-	/* fieldsLinker */
-	.fieldsLinker div{
-		font-weight:bold;
-	}
 	
-	.fieldsLinker ul {
-		list-style:none;
-		margin-left:0px;
-		padding-left:0px;
-		font-weight:normal;
-	}
-	.fieldsLinker li {
-		border:solid 1px grey;
-		padding:5px 2px 5px 8px;
-		margin-top:7px;/* à adapter */
-		margin-bottom:8px;/* à adapter */
-	   user-select: none;
-	   -moz-user-select: none;
-	   -webkit-user-select: none;
-	   -ms-user-select: none;
-		cursor:pointer;
-	}
 	/* ---------- */
 	
 	#bonds{
@@ -72,6 +54,7 @@
 		border-radius:2px;
 		min-width:300px;
 	 }
+	 
 	</style>
   </head>
   <body>
@@ -97,8 +80,8 @@
 	  
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
 	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.4
-	  <p>Allows to link elements from list A to elements from list B on a 1 to 1 basic and get the links in a js object</p>
-	  <p>New in v0.4 : new option allowing to link one to many.</p>
+	  <p>Allows to link elements from list A to elements from list B and get the links in a js object</p>
+	  <p>New in v0.45 : new option allowing to declare some fields as mandatory.</p>
 	  <ul>
 	  <li>You can choose beetween an output with positions or names</li>
 	  <li>Colours can be re-defined and lines come in 2 flavours</li>
@@ -151,7 +134,7 @@
 	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
-	  <script src="./demo-fieldsLinker.js"></script>
+	  <script src="./fieldsLinker.js"></script>
 	  
 	<script>  
 	var fieldLinks;
@@ -159,6 +142,9 @@
 			//var existingLinks = [{"from":"firstName","to":"first_name"}] ;
 			//existingLinks = [{"from":0,"to":4}] ;
 			var input = {
+			    "localization":{
+					//"mandatoryErrorMessage":"Ce champ est obligatoire",
+				},
 			    "options":{
 					"byName" : true,
 					"lineStyle":"square-ends",
@@ -167,7 +153,7 @@
 				},
 				"listA":
 					{
-						"name":"columns in files",
+						"name":"Columns in files",
 						"list" : [
 							"firstName",
 							"lastName",
@@ -181,9 +167,8 @@
 					},
 				"listB":
 					{
-						"name":"Fields available",
+						"name":"Available Fields",
 						"list" : [
-							"Id",
 							"Company",
 							"jobTitle",
 							"adress 1",	
@@ -192,15 +177,15 @@
 							"last_name",
 							"email_adress",
 							"Phone number"
+						],
+						"mandatories" :[
+							"last_name",
+							"email_adress"
 						]
 					},
-				//"existingLinks": existingLinks
-				// ex [{"from":"firstName","to":"first_name"},{"from":2,"to":1}] 
 			};
 			
 		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
-			
-			//$("#input").html("input => " + JSON.stringify(existingLinks));
 			
 			$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");

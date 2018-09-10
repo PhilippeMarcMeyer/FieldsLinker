@@ -1,7 +1,7 @@
 /* 
  Copyright (C) Philippe Meyer 2018
  Distributed under the MIT License
- fieldsLinker v 0.41 
+ fieldsLinker v 0.45 : Mandatory fields
 */
 
 (function ( $ ) {
@@ -20,6 +20,7 @@
 	var linksByName=[];
 	var List1 = [];
 	var List2 = [];	
+	var Mandatories = [];
 	var ListHeights1 = [];
 	var ListHeights2 = [];	
 	var move = null;
@@ -29,6 +30,7 @@
 	var lineColor = "black";
 	var autoDetect = "off";
 	var oneToMany = "off";
+	var mandatoryErrorMessage = "This field is mandatory";
 
 		
 	var draw = function(){
@@ -132,6 +134,10 @@
 					byName = data.options.byName;
 				}
 				
+				if(data.localization.mandatoryErrorMessage){
+					mandatoryErrorMessage = data.localization.mandatoryErrorMessage;
+				}
+				
 				if(data.options.lineStyle){
 					if(data.options.lineStyle=="square-ends")
 						lineStyle = "square-ends";
@@ -224,13 +230,21 @@
 					.appendTo($rightDiv)
 					.css({"text-align":"left","list-style":"none"})
 					
+			    Mandatories = [];
+				if(data.listB.mandatories){
+					Mandatories = data.listB.mandatories.slice(0);
+				}
 				data.listB.list.forEach(function(x,i){
 					List2.push(x);
+					
+					var isMandatory = (Mandatories.indexOf(x) != -1);
+					
 					var $li =  $("<li></li>");
 					$li
 						.appendTo($ul)
 						.attr("data-offset",i)
 						.attr("data-name",x)
+						.attr("data-mandatory",isMandatory)
 						.text(x);
 				});
 				
@@ -458,13 +472,47 @@
 				draw();			
 			}
 			return(this);
+			
 		}else if( action === "getLinks" ) {
 			if(!onError){
-			  if(byName){
-				  return linksByName;
+				var isMandatoryError = false;
+				var links = null;
+				var errorMessage = mandatoryErrorMessage + " : ";
+				var fieldInErrorName = "";
+				  if(byName){
+					  links = linksByName;
+				  }else{
+					  links = linksByOrder;
+
+				  }
+			  
+			  Mandatories.forEach(function(m,i){
+				  if(!isMandatoryError){
+					 var match = linksByName.filter(function(link){
+						return link.to == m;
+					});
+					if(match.length==0){
+						 isMandatoryError = true;
+						 fieldInErrorName = m;
+					 }
+				  }
+			  });
+			  
+			  if(isMandatoryError){
+				  return {
+					  "error" : true,
+					  "errorMessage" : errorMessage + fieldInErrorName,
+					  "links" : []
+				  };
 			  }else{
-				  return linksByOrder;
+				  
+				  return {
+					  "error" : false,
+					  "errorMessage" : "",
+					  "links" : links
+				  };  
 			  }
+			  
 			}else{
 				return [];
 			}

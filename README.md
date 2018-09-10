@@ -8,14 +8,16 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 My first jquery plug-in
 
+v 0.45 : Mandatory fields. the css is now in his own file.
+
 v 0.41 : the colors don't change when links are deleted and the color of the link while drawing is consistent with the final result
 
-v0.4 : new option allowing to link one to many
+v 0.4 : new option allowing to link one to many
 
-v0.3 :
+v 0.3 :
 FieldsLinker becomes responsive !
 
-v0.2 :
+v 0.2 :
 You can choose beetween an output with positions or names
 Colours can be re-defined and lines come in 2 flavours
 You may input somme links from a previous session
@@ -23,7 +25,7 @@ Auto-detect feature helps you find part of the links (optional)
 Optional "Erase Links" button
 Works in Chrome, Chromium, Opera, Firefox and IE (9+)
 
-v0.1  : the lines are drawn while dragging over the canvas and the horizontal middle points of the cells are calculated	
+v 0.1  : the lines are drawn while dragging over the canvas and the horizontal middle points of the cells are calculated	
 no parameters anymore
 
 Tested on : Chrome, Firefox, Chromium, IE, Opéra : OK for Chrome, Firefox and Opera
