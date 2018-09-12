@@ -1,7 +1,7 @@
 /* 
  Copyright (C) Philippe Meyer 2018
  Distributed under the MIT License
- fieldsLinker v 0.45 : Mandatory fields
+ fieldsLinker v 0.49 : disable and enable feature
 */
 
 (function ( $ ) {
@@ -31,7 +31,7 @@
 	var oneToMany = "off";
 	var mandatoryErrorMessage = "This field is mandatory";
 	var canvasTopOffset = 0;
-
+	var isDisabled = false;
 		
 	var draw = function(){
 		canvasCtx.beginPath(); 
@@ -303,7 +303,8 @@
 	            });
 				
 	            // Listeners :
-	            if(data.options.buttonErase){
+	            if (data.options.buttonErase) {
+	                if (isDisabled) return;
 	                $(this).find(".FL-main .eraseLink").on("click",function(e){
 	                    linksByOrder.length = 0;
 	                    linksByName.length = 0;
@@ -314,6 +315,7 @@
 	            // On mousedown in left List : 
 	            $(this).find(".FL-main .FL-left li").on("mousedown",function(e){
 	                // we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
+	                if (isDisabled) return;
 	                move = {};
 	                move.offsetA = $(this).data("offset");
 	                move.nameA = $(this).data("name");
@@ -321,18 +323,21 @@
 	                move.nameB = -1;
 	            });
 				
-	            $(this).find(".FL-main .FL-left li .unlink").on("click",function(e){
+	            $(this).find(".FL-main .FL-left li .unlink").on("click", function (e) {
+	                if (isDisabled) return;
 	                eraseLinkA($(this).parent().data("offset"));	
 	                draw();
 	            });
 				
-	            $(this).find(".FL-main .FL-left li").on("mouseup",function(e){
+	            $(this).find(".FL-main .FL-left li").on("mouseup", function (e) {
+	                if (isDisabled) return;
 	                // We do a mouse up on le teft side : the drag is canceled
 	                move=null;
 	            });
 				
 	            // Mouse up on the right side 
-	            $(this).find(".FL-main .FL-right li").on("mouseup",function(e){
+	            $(this).find(".FL-main .FL-right li").on("mouseup", function (e) {
+	                if (isDisabled) return;
 	                if(move == null){ // no drag 
 	                    eraseLinkB($(this).data("offset")); // we erase an existing link if any
 	                    draw();
@@ -348,7 +353,7 @@
 				
 	            // mousemove over a right cell
 	            $(this).find(".FL-main .FL-right li").on("mousemove",function(e){
-						
+	                if (isDisabled) return;
 	                if(move != null){ // drag occuring
 			
 	                    var _from = move.offsetA;
@@ -373,7 +378,8 @@
 	            });
 				
 	            // mousemove over the canvas
-	            $(this).find("canvas").on("mousemove",function(e){
+	            $(this).find("canvas").on("mousemove", function (e) {
+	                if (isDisabled) return;
 	                if(move != null){
 	                    canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 	                    // we redraw all the existing links
@@ -397,7 +403,8 @@
 	                }
 	            });
 				
-	            $(this).find(".FL-main").on("mouseup",function(e){
+	            $(this).find(".FL-main").on("mouseup", function (e) {
+	                if (isDisabled) return;
 	                if(move!=null){
 	                    move = null;
 	                    draw();
@@ -589,7 +596,16 @@
 				}
 			draw();
 			}
-		}else{
+		} else if (action == "disable") {
+		    var that = this;
+		    isDisabled = true;
+		    return (that);
+		}
+		else if (action == "enable") {
+		    var that = this;
+		    isDisabled = false;
+		    return (that);
+		} else {
 			onError = true;
 			console.log(errMsg + "no action parameter provided (param 1)" );
 		} 
