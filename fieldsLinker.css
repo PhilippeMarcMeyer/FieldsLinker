@@ -1,7 +1,7 @@
 /* 
  Copyright (C) Philippe Meyer 2018
  Distributed under the MIT License
- fieldsLinker v 0.45 
+ fieldsLinker v 0.75
 */
 
 .fieldsLinker div{
@@ -37,7 +37,7 @@
 	color:white;
 }
 
-.FL-mid{
-    /*margin-top:-4px !important;*/ /* à corriger*/
+.fieldsLinker li.inactive{
+    opacity:0.5;
 }
 

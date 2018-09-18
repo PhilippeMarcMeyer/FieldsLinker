@@ -1,7 +1,7 @@
 /* 
  Copyright (C) Philippe Meyer 2018
  Distributed under the MIT License
- fieldsLinker v 0.49 : disable and enable feature
+ fieldsLinker v 0.6 : tooltips + disable mor effective
 */
 
 (function ( $ ) {
@@ -30,10 +30,13 @@
 	var autoDetect = "off";
 	var oneToMany = "off";
 	var mandatoryErrorMessage = "This field is mandatory";
+	var mandatoryTooltips = true;
 	var canvasTopOffset = 0;
 	var isDisabled = false;
+	var globalAlpha = 1;
 		
-	var draw = function(){
+	var draw = function () {
+	    canvasCtx.globalAlpha = globalAlpha;
 		canvasCtx.beginPath(); 
 		canvasCtx.fillStyle = 'white';
 		canvasCtx.strokeStyle = lineColor;
@@ -89,9 +92,15 @@
 		linksByOrder.push({"from":infos.offsetA,"to":infos.offsetB});
 		linksByName.push({"from":infos.nameA,"to":infos.nameB});
 		draw();
+
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "addLink"
+		});
 	}
 
-	var eraseLinkA = function(offset){
+	var eraseLinkA = function (offset) {
+
 		var pos = -1;
 		linksByOrder.forEach(function(x,i){
 			if(x.from == offset){
@@ -103,9 +112,14 @@
 			linksByName.splice(pos,1);
 			draw();
 		}
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "removeLink"
+		});
 	}
 
-	var eraseLinkB = function(offset){
+	var eraseLinkB = function (offset) {
+
 		var pos = -1;
 		linksByOrder.forEach(function(x,i){
 			if(x.to == offset){
@@ -117,6 +131,10 @@
 			linksByName.splice(pos,1);
 			draw();
 		}
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "removeLink"
+		});
 	}
 
 	$.fn.fieldsLinker = function(action,input) {
@@ -248,8 +266,16 @@
 						.attr("data-name",x)
 						.attr("data-mandatory",isMandatory)
 						.text(x);
+
+	                if (isMandatory && mandatoryTooltips) {
+	                    $li
+                            .attr("data-placement", "top")
+                            .attr("title", mandatoryErrorMessage);
+
+	                    $li.tooltip();
+	                }
 	            });
-				
+
 	            canvasId = "cnv_"+Date.now();
 				
 	            var w = $midDiv.width();	
@@ -304,11 +330,15 @@
 				
 	            // Listeners :
 	            if (data.options.buttonErase) {
-	                if (isDisabled) return;
-	                $(this).find(".FL-main .eraseLink").on("click",function(e){
+	                $(this).find(".FL-main .eraseLink").on("click", function (e) {
+	                    if (isDisabled) return;
 	                    linksByOrder.length = 0;
 	                    linksByName.length = 0;
 	                    draw();
+	                    $("body").trigger({
+	                        type: "fieldLinkerUpdate",
+	                        what: "removeLink"
+	                    });
 	                });
 	            }
 				
@@ -481,20 +511,17 @@
 	                canvasWidth = $(that).find(".FL-main .FL-mid").width();
 	                canvasPtr.width = canvasWidth;
 	                $("#"+canvasId).css("width",canvasWidth+"px");
-		
 	                draw();
 	            });
-
 	            draw();			
 	        }
 	        return (this);
 
 	    }else if(action == "eraseLinks"){
-
 	        linksByOrder.length = 0;
 	        linksByName.length = 0;
 	        draw();
-			
+		
 		}else if( action === "getLinks" ) {
 			if(!onError){
 				var isMandatoryError = false;
@@ -505,7 +532,6 @@
 					  links = linksByName;
 				  }else{
 					  links = linksByOrder;
-
 				  }
 			  
 			  Mandatories.forEach(function(m,i){
@@ -599,11 +625,35 @@
 		} else if (action == "disable") {
 		    var that = this;
 		    isDisabled = true;
+		    $(that)
+                .find(".eraseLink")
+                .prop("disabled", isDisabled);
+
+		    $(that)
+                .find("li")
+                .addClass("inactive");
+
+		    globalAlpha = 0.5;
+
+		    draw();
+
 		    return (that);
 		}
 		else if (action == "enable") {
 		    var that = this;
 		    isDisabled = false;
+		    $(that)
+                .find(".eraseLink")
+                .prop("disabled", isDisabled);
+
+		    $(that)
+                .find("li")
+                .removeClass("inactive");
+
+		    globalAlpha = 1;
+
+		    draw();
+
 		    return (that);
 		} else {
 			onError = true;
