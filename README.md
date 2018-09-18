@@ -6,7 +6,11 @@ Given 2 lists : for instance one from a text import, the second listing the fiel
 
 the jquery plugin allows you to draw and save links between the 2 lists
 
-My first jquery plug-in
+v 0.60 : 
+Mandatory fields show a tooltip (mandatoryErrorMessage)
+disable/enable : disable/enable everything, the global opacity is set to 0.5
+canvasTopOffset : integer to tweek the vertical position of the canvas where the links are drawn 
+sometimes useless. example : -4 => set the canvas zone 4px closer to the top.
 
 v 0.45 : Mandatory fields. the css is now in his own file.
 
