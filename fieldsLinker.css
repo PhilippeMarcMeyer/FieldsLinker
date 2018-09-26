@@ -41,3 +41,8 @@
     opacity:0.5;
 }
 
+.fieldsLinker li.free{
+    border:dotted 1px grey;
+	background:#ececec;
+}
+
