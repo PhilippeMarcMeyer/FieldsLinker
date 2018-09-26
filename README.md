@@ -6,6 +6,9 @@ Given 2 lists : for instance one from a text import, the second listing the fiel
 
 the jquery plugin allows you to draw and save links between the 2 lists
 
+![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
+
+
 v 0.60 : 
 Mandatory fields show a tooltip (mandatoryErrorMessage)
 disable/enable : disable/enable everything, the global opacity is set to 0.5
