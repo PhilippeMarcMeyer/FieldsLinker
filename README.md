@@ -1,13 +1,15 @@
 # FieldsLinker
 
-Allow to make a 1 to 1 link between elements of 2 lists
+Designed for matching files headers to database fields during the process importing. 
+Allows drawing links between elements of 2 lists (headers of the file on the left, column names on the right)
+and getting back the result in a js object
 
 Given 2 lists : for instance one from a text import, the second listing the fields a db table
-
 the jquery plugin allows you to draw and save links between the 2 lists
 
-![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
+You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
+![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
 
 v 0.60 : 
 Mandatory fields show a tooltip (mandatoryErrorMessage)
