@@ -98,92 +98,6 @@
 			eraseLinkB(infos.offsetB);
 		}
 
-
-		
-		if(autoSort == "onxxx"){
-
-			var itemGoing = $("#"+root).find(".FL-main .FL-right li").eq(infos.offsetA);
-			var itemComing = $("#"+root).find(".FL-main .FL-right li[data-offset='"+infos.offsetB+"']");
-			
-			var dataName = $(itemComing).attr("data-name");
-			var html =  $(itemComing).html();
-			
-			var isFree = $(itemGoing).hasClass("free");
-			
-			var htmlComing = $(itemGoing).html();
-			$(itemComing)
-				.attr("data-name",htmlComing)
-				.attr("data-offset",infos.offsetA)
-				.html(htmlComing);
-								
-			$(itemGoing)
-				.attr("data-name",html)
-				.attr("data-offset",infos.offsetB)
-				.html(html);	
-				
-			if(isFree){
-				$(itemGoing).attr("class","");
-
-				$(itemComing).attr("class","inactive free");
-				
-			}
-						
-			$("#"+root).find(".FL-main .FL-right li").tooltip('destroy');
-			
-			$("#"+root).find(".FL-main .FL-right li")
-				.attr("data-mandatory","false");
-			
-			
-			Mandatories.forEach(function(x,i){
-				 $("#"+root).find(".FL-main .FL-right li[data-name='"+x+"']")
-					.attr("data-mandatory","true");
-					
-				if (mandatoryTooltips) {
-					$("#"+root).find(".FL-main .FL-right li[data-name='"+x+"']")
-					   .attr("data-placement", "top")
-					   .attr("title", mandatoryErrorMessage)
-					   .tooltip();
-				}
-
-			});
-
-		}
-		
-		if(autoSort == "on"){
-			var liArray = [];
-			var ul = document.getElementById(root).querySelector(".FL-right ul"); // ".FL-main .FL-right li"
-			ul.querySelectorAll("li").forEach(function(x){
-				liArray.push(x);
-			});
-			
-			var cache = null;
-			var positionA = -1;
-			var positionB = -1;
-			liArray.forEach(function(x,i){
-				var dataOffset = x.getAttribute("data-offset");			
-				if (dataOffset== infos.offsetA){
-					cache = x;
-					positionA = i;
-				}else if(dataOffset == infos.offsetB){
-					
-					positionB = i;
-				}
-			});
-
-			if(cache != null){
-				liArray[positionA] = liArray[positionB];
-				liArray[positionB] = cache;
-							ul.innerHTML = "";
-			liArray.forEach(function(x){
-				ul.appendChild(x); 
-			});
-			}
-
-			
-
-
-		}
-		
 		linksByOrder.push({"from":infos.offsetA,"to":infos.offsetB});
 		linksByName.push({"from":infos.nameA,"to":infos.nameB});
 			
@@ -232,16 +146,6 @@
 		    what: "removeLink"
 		});
 	}
-	
-	var getMidHeight = function(that){
-		var position = $(that).position();
-		var hInner = $(that).height();
-		var hOuter = $(that).outerHeight();
-		var delta = Math.floor(0.5 + (hOuter - hInner)/2);
-		var midInner = Math.floor(0.5 + hInner/2);
-		var midHeight = position.top + midInner - delta;
-		return midHeight;
-	}
 
 	$.fn.fieldsLinker = function(action,input) {
 	    if (action == "init") {
@@ -285,10 +189,6 @@
 
 	            if (data.options.canvasTopOffset) {
 	                canvasTopOffset = data.options.canvasTopOffset;
-	            }
-				
-				if (data.options.autoSort) {
-	                autoSort = data.options.autoSort;
 	            }
 
 	            $(this).html("");
@@ -385,27 +285,7 @@
 	                    $li.tooltip();
 	                }
 	            });
-
-				if (autoSort == "on") {
-	                missingItemsOnListB = data.listA.list.length - data.listB.list.length;
-					if(missingItemsOnListB < 0) missingItemsOnListB = 0;
-	            }
-				
-				if(missingItemsOnListB > 0){
-					var listBLength =  data.listA.list.length;
-					for(var i = 0; i < missingItemsOnListB;i++){
-						var $li =  $("<li></li>");
-							$li
-							.appendTo($ul)
-							.attr("data-offset",i+listBLength-1)
-							.addClass("inactive free")
-							.attr("data-name","&nbsp;")
-							.attr("data-mandatory",false)
-							.html("&nbsp;");
-					}
-					
-				}
-				
+			
 	            canvasId = "cnv_"+Date.now();
 				
 	            var w = $midDiv.width();	
@@ -500,10 +380,10 @@
 					var that = this;
 	                if (isDisabled) return;
 	                if(move == null){ // no drag 
-						if(autoSort == "off"){
-							eraseLinkB($(that).attr("data-offset")); // we erase an existing link if any
-							draw();
-						}
+						
+				eraseLinkB($(that).attr("data-offset")); // we erase an existing link if any
+				draw();
+
 	                }else{ // we finish a drag then get the infos an create a link
 						if(!$(that).hasClass("inactive")){
 							eraseLinkB($(that).attr("data-offset")); // we erase an existing link if any
@@ -527,13 +407,8 @@
 	                    var Ay = ListHeights1[_from];
 						 
 	                    var Bx = canvasWidth;
-						if(autoSort == "on"){
-							var By = getMidHeight(this);	
-						}else{
-							var By = ListHeights2[_To];		
-						}
-	                    
-						 
+			    var By = ListHeights2[_To];
+	                    		 
 	                    draw();
 	                    canvasCtx.beginPath(); 
 	                    var color= handleColor[_from%handleColor.length];
