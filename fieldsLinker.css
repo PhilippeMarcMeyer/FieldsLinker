@@ -29,6 +29,8 @@
 	background: linear-gradient(#ffffff, #e9e9e9);
 	color:black;
 	border-radius : 0px;
+	text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .fieldsLinker li[data-mandatory='true']{
