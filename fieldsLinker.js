@@ -1,5 +1,5 @@
 /* 
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.71 
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.72 : New lineStyle : square-ends-dotted : white dots at the beginings and ends of lines on hover
 
 */
 
@@ -41,10 +41,12 @@
         effectHoverBorderWidth = 2;
         effectHoveredLink = -1;
     }
+	
+	const TWO_PI = Math.PI*2;
 
     var draw = function () {
 
-        canvasCtx.globalAlpha = globalAlpha;
+        canvasCtx.globalAlpha  = 1 //= globalAlpha;
         canvasCtx.beginPath();
         canvasCtx.fillStyle = 'white';
         canvasCtx.strokeStyle = lineColor;
@@ -75,13 +77,13 @@
             }
             canvasCtx.moveTo(Ax, Ay);
             var handleCurrentColor = handleColor[_from % handleColor.length];
-            if (lineStyle == "square-ends") {
+            if (lineStyle == "square-ends" || lineStyle == "square-ends-dotted") {
                 canvasCtx.fillStyle = handleCurrentColor;
                 canvasCtx.strokeStyle = handleCurrentColor;
                 canvasCtx.rect(Ax, Ay - 4, 8, 8);
                 canvasCtx.rect(Bx - 8, By - 4, 8, 8);
                 canvasCtx.fill();
-
+				canvasCtx.stroke();
                 canvasCtx.moveTo(Ax + 8, Ay);
                 canvasCtx.lineTo(Ax + 16, Ay);
                 canvasCtx.lineTo(Bx - 16, By);
@@ -93,6 +95,18 @@
                 canvasCtx.stroke();
             }
             canvasCtx.closePath();
+			
+			 if (effectHoveredLink == _from && lineStyle == "square-ends-dotted") {
+				  canvasCtx.beginPath();
+				  canvasCtx.arc(Ax+effectHoverBorderWidth+1, Ay,effectHoverBorderWidth, 0, TWO_PI, false);
+				  canvasCtx.fillStyle = "white";
+				  canvasCtx.fill();
+				  canvasCtx.arc(Bx-effectHoverBorderWidth-1, By,effectHoverBorderWidth, 0, TWO_PI, false);
+				  canvasCtx.fillStyle = "white";
+				  canvasCtx.fill();
+			 }
+			 canvasCtx.lineWidth =  1;	
+
         });
     }
 
@@ -250,13 +264,15 @@
                     byName = data.options.byName;
                 }
 
-                if (data.localization.mandatoryErrorMessage) {
-                    mandatoryErrorMessage = data.localization.mandatoryErrorMessage;
+                if (data.localization) {
+                    if (data.localization.mandatoryErrorMessage) {
+                        mandatoryErrorMessage = data.localization.mandatoryErrorMessage;
+                    }
                 }
 
                 if (data.options.lineStyle) {
-                    if (data.options.lineStyle == "square-ends")
-                        lineStyle = "square-ends";
+                    if (data.options.lineStyle == "square-ends" || data.options.lineStyle == "square-ends-dotted")
+                        lineStyle = data.options.lineStyle;
                 }
 
                 if (data.options.lineColor) {
