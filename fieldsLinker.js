@@ -40,7 +40,6 @@
         effectHover = "off";
         effectHoverBorderWidth = 2;
         effectHoveredLink = -1;
-        topContext = this;
     }
 
     var draw = function () {
@@ -235,7 +234,7 @@
 
     $.fn.fieldsLinker = function (action, input) {
         that = this; // keep the context for listeners
-        topContext = this;
+      
         if (action == "init") {
             if (!input) {
                 onError = true;
@@ -289,7 +288,7 @@
                 }
 
                 $(this).html("");
-
+				topContext = this;
                 var $main = $("<div></div>");
                 $main
 					.appendTo($(this))
