@@ -1,11 +1,11 @@
 /* 
- Copyright (C) Philippe Meyer 2018
- Distributed under the MIT License
- fieldsLinker v 0.7 : effect on hover link + init destroys automaticaly the previous context 
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.71 
+
 */
+
 (function ($) {
     const errMsg = "fieldsLinker error : "
-    var data, canvasId, canvasCtx, canvasPtr, canvasWidth, canvasHeight, onError, className, byName, linksByOrder, linksByName, List1, List2, Mandatories, ListHeights1, ListHeights2, move, that, lineStyle, handleColor, lineColor, autoDetect, oneToMany, mandatoryErrorMessage, mandatoryTooltips, canvasTopOffset, isDisabled, globalAlpha, effectHover, effectHoverDefaultBorderRight, effectHoverDefaultBorderLeft, effectHoverBorderWidth, effectHoveredLink, topContext;
+    var data, canvasId, canvasCtx, canvasPtr, canvasWidth, canvasHeight, onError, className, byName, linksByOrder, linksByName, List1, List2, Mandatories, ListHeights1, ListHeights2, move, that, lineStyle, handleColor, lineColor, autoDetect, oneToMany, mandatoryErrorMessage, mandatoryTooltips, canvasTopOffset, isDisabled, globalAlpha, effectHover, effectHoverBorderWidth, effectHoveredLink, topContext;
 
     var setDefaults = function () {
 
@@ -38,8 +38,6 @@
         isDisabled = false;
         globalAlpha = 1;
         effectHover = "off";
-        effectHoverDefaultBorderRight = "1px solid black";
-        effectHoverDefaultBorderLeft = "1px solid black";
         effectHoverBorderWidth = 2;
         effectHoveredLink = -1;
         topContext = this;
@@ -99,6 +97,39 @@
         });
     }
 
+    var removerOverEffect = function (offsetA,offsetB) {
+        var listsToClean = [".FL-main .FL-left li", ".FL-main .FL-right li"];
+        if (offsetA == undefined) offsetA = -1;
+        if (offsetB == undefined) offsetB = -1;
+        var offsets = [offsetA, offsetB];
+        listsToClean.forEach(function (listToClean, i) {
+            var offset = offsets[i];
+            var $LIs;
+            if (offset == -1) {
+                $LIs = $(topContext).find(listToClean);
+            } else {
+                $LIs = $(topContext).find(listToClean).eq(offset);
+            }
+            $LIs.each(function () {
+                $(this).removeClass("linkOver");
+                var styleAttribute = $(this).attr("style");
+                if (!styleAttribute) styleAttribute = ""
+                var styles = styleAttribute.split(";");
+                if (styles.length > 0) {
+                    var style = "";
+                    styles.forEach(function (item) {
+                        item = item.replace(/ /g, "");
+                        if (item != "" && item.indexOf("border-color:") == -1) {
+                            style += item + ";"
+                        }
+                    });
+                    $(this).attr("style", style);
+                }
+            });
+
+        });
+    }
+
     var makeLink = function (infos) {
         if (oneToMany == "off") {
             // If the link already exists then we erase it
@@ -134,8 +165,7 @@
             what: "removeLink"
         });
 
-        $(topContext).find(".FL-main .FL-left li").css("border", effectHoverDefaultBorderLeft);
-        $(topContext).find(".FL-main .FL-right li").css("border", effectHoverDefaultBorderRight);
+        removerOverEffect();
     }
 
     var eraseLinkB = function (offset) {
@@ -155,25 +185,23 @@
             type: "fieldLinkerUpdate",
             what: "removeLink"
         });
-        $(topContext).find(".FL-main .FL-left li").css("border", effectHoverDefaultBorderLeft);
-        $(topContext).find(".FL-main .FL-right li").css("border", effectHoverDefaultBorderRight);
+
+        removerOverEffect();
     }
 
-    var hoverEffect = function (onOff,link) { // triggered by the LI elements only, not the canvas
+    var hoverEffect = function (onOff, link) { // triggered by the LI elements only, not the canvas
         that = this;
         if (onOff == "on") {
             var handleCurrentColor = handleColor[link.from % handleColor.length];
-            var borderEffect = effectHoverBorderWidth + "px solid " + handleCurrentColor;
-            $(that).find(".FL-main .FL-left li[data-offset='" + link.from + "']").css("border", borderEffect);
-            $(that).find(".FL-main .FL-right li[data-offset='" + link.to + "']").css("border", borderEffect);
+            $(that).find(".FL-main .FL-left li[data-offset='" + link.from + "']").addClass("linkOver").css("border-color", handleCurrentColor);
+            $(that).find(".FL-main .FL-right li[data-offset='" + link.to + "']").addClass("linkOver").css("border-color", handleCurrentColor);
             effectHoveredLink = link.from;
-    
+
         } else {
             if (effectHoveredLink == link.from) {
                 effectHoveredLink = -1;
             }
-            $(that).find(".FL-main .FL-left li[data-offset='" + link.from + "']").css("border",effectHoverDefaultBorderLeft);
-            $(that).find(".FL-main .FL-right li[data-offset='" + link.to + "']").css("border",effectHoverDefaultBorderRight);
+            removerOverEffect(link.from, link.to);
         }
         draw();
     }
@@ -199,8 +227,7 @@
         return false;
     }
 
-
-    var dist =function(x1, y1, x2, y2) {
+    var dist = function (x1, y1, x2, y2) {
         var diffX = x2 - x1;
         var diffY = y2 - y1;
         return Math.sqrt(diffX * diffX + diffY * diffY);
@@ -256,11 +283,10 @@
                 if (data.options.effectHover) {
                     effectHover = data.options.effectHover;
 
-                    if (data.options.effectHoverBorderWidth != undefined){
+                    if (data.options.effectHoverBorderWidth != undefined) {
                         effectHoverBorderWidth = data.options.effectHoverBorderWidth;
                     }
                 }
-                
 
                 $(this).html("");
 
@@ -387,7 +413,7 @@
                     var hOuter = $(this).outerHeight();
 
                     var delta = (hOuter - hInner) / 2;
-                    var midInner =  hInner / 2;
+                    var midInner = hInner / 2;
                     var midHeight = Math.round(position.top + midInner - delta);
                     ListHeights1.push(midHeight);
                     if (i == 0) {
@@ -403,778 +429,15 @@
                     var position = $(this).position();
                     var hInner = $(this).height();
                     var hOuter = $(this).outerHeight();
-                    var delta =(hOuter - hInner) / 2;
-                    var midInner =  hInner / 2;
-                    var midHeight = Math.round(position.top + midInner - delta);
-                    ListHeights2.push(midHeight);
-                });
-
-                // Listeners :
-                if (effectHover == "on") {
-                    effectHoverDefaultBorderLeft = $(this).find(".FL-main .FL-left li").first().css("border");
-                    effectHoverDefaultBorderRight = $(this).find(".FL-main .FL-right li").first().css("border");
-
-                    $(this).find(".FL-main .FL-left li").hover(function (e) {
-                        if (isDisabled) return;
-
-                        var offsetA = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            hoverEffect.call(that, "off", x);
-                            if (x.from == offsetA) {
-                                hoverEffect.call(that, "on", x);
-                            }
-                        });
-
-                    }, function (e) {
-                        if (isDisabled) return;
-
-                        var offsetA = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.from == offsetA) {
-                                hoverEffect.call(that, "off", x);
-                            }
-                        });
-                    });
-
-                    $(this).find(".FL-main .FL-right li").hover(function (e) {
-                        if (isDisabled) return;
-
-                        var offsetB = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.to == offsetB) {
-                                hoverEffect.call(that, "on", x);
-                            }
-                        });
-
-                    }, function (e) {
-                        if (isDisabled) return;
-                        var offsetB = $(this).data("offset");
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.to == offsetB) {
-                                hoverEffect.call(that, "off", x);
-                            }
-                        });
-                    });
-                }
-
-                if (data.options.buttonErase) {
-                    $(this).find(".FL-main .eraseLink").on("click", function (e) {
-                        if (isDisabled) return;
-                        linksByOrder.length = 0;
-                        linksByName.length = 0;
-                        draw();
-                        $("body").trigger({
-                            type: "fieldLinkerUpdate",
-                            what: "removeLink"
-                        });
-                    });
-                }
-
-                // On mousedown in left List : 
-                $(this).find(".FL-main .FL-left li").on("mousedown", function (e) {
-                    // we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
-                    if (isDisabled) return;
-                    move = {};
-                    move.offsetA = $(this).data("offset");
-                    move.nameA = $(this).data("name");
-                    move.offsetB = -1;
-                    move.nameB = -1;
-                });
-
-                $(this).find(".FL-main .FL-left li .unlink").on("click", function (e) {
-                    if (isDisabled) return;
-                    eraseLinkA($(this).parent().data("offset"));
-                    draw();
-                });
-
-                $(this).find(".FL-main .FL-left li").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    // We do a mouse up on le teft side : the drag is canceled
-                    move = null;
-                });
-
-                // Mouse up on the right side 
-                $(this).find(".FL-main .FL-right li").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    if (move == null) { // no drag 
-                        eraseLinkB($(this).data("offset")); // we erase an existing link if any
-                        draw();
-                    } else { // we finish a drag then get the infos an create a link
-                        eraseLinkB($(this).data("offset")); // we erase an existing link if any
-                        move.offsetB = $(this).data("offset");
-                        move.nameB = $(this).data("name");
-                        var infos = JSON.parse(JSON.stringify(move));
-                        move = null;
-                        makeLink(infos);
-                    }
-                });
-
-                // mousemove over a right cell
-                $(this).find(".FL-main .FL-right li").on("mousemove", function (e) {
-                    if (isDisabled) return;
-                    if (move != null) { // drag occuring
-
-                        var _from = move.offsetA;
-                        var _To = $(this).data("offset");
-
-                        var Ax = 0;
-                        var Ay = ListHeights1[_from];
-
-                        var Bx = canvasWidth;
-                        var By = ListHeights2[_To];
-
-                        draw();
-                        canvasCtx.beginPath();
-                        var color = handleColor[_from % handleColor.length];
-                        canvasCtx.fillStyle = 'white';
-                        canvasCtx.strokeStyle = color;
-
-                        canvasCtx.moveTo(Ax, Ay);
-                        canvasCtx.lineTo(Bx, By);
-                        canvasCtx.stroke();
-                    }
-                });
-
-                // mousemove over the canvas
-                $(this).find("canvas").on("mousemove", function (e) {
-                    var that = this;
-                    if (isDisabled) return;
-                    if (move != null) {
-                        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-                        // we redraw all the existing links
-                        draw();
-                        canvasCtx.beginPath();
-                        // we draw the new would-be link
-                        var _from = move.offsetA;
-                        var color = handleColor[_from % handleColor.length];
-                        canvasCtx.fillStyle = 'white';
-                        canvasCtx.strokeStyle = color;
-
-                        var Ax = 0;
-                        var Ay = ListHeights1[_from];
-                        // mouse position relative to the canvas
-                        var Bx = e.offsetX;
-                        var By = e.offsetY;
-
-                        canvasCtx.moveTo(Ax, Ay);
-                        canvasCtx.lineTo(Bx, By);
-                        canvasCtx.stroke();
-                    } else {
-
-                        var rect = canvasPtr.getBoundingClientRect();
-                        var mouseX = e.clientX - rect.left;
-                        var mouseY = e.clientY - rect.top;
-                        effectHoveredLinks = -1;
-                        linksByOrder.forEach(function (link, i) {
-                            var _from = link.from;
-                            var _to = link.to;
-
-                            var Ax = 0;
-                            var Ay = ListHeights1[_from];
-
-                            var Bx = canvasWidth;
-                            var By = ListHeights2[_to];
-
-                            var hit = collidePointLine(mouseX, mouseY, Ax, Ay, Bx, By, 0.5);
-
-                            if (hit) {
-                                $(topContext).find(".FL-main .FL-left li[data-offset='" + link.from + "']").trigger("mouseenter");
-                            } else {
-                                $(topContext).find(".FL-main .FL-left li[data-offset='" + link.from + "']").trigger("mouseleave");
-                            }
-                        });
-                    }
-                });
-
-                $(this).find(".FL-main").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    if (move != null) {
-                        move = null;
-                        draw();
-                    }
-                });
-
-                if (data.existingLinks) {
-                    data.existingLinks.forEach(function (link) {
-                        var pos = -1;
-                        if (byName) {
-                            var offA = List1.indexOf(link["from"]);
-                            var offB = List2.indexOf(link["to"]);
-                            if (offA != -1 && offB != -1) {
-                                var linkWithOffset = {
-                                    "from": offA,
-                                    "to": offB,
-                                }
-                                linksByName.push(link);
-                                linksByOrder.push(linkWithOffset);
-                            }
-                        } else {
-                            var offA = link["from"];
-                            var offB = link["to"];
-                            if (offA < List1.length && offB < List2.length) {
-                                var linkWithNames = {
-                                    "from": List1[offA],
-                                    "to": List2[offB]
-                                }
-                                linksByOrder.push(link);
-                                linksByName.push(linkWithNames);
-                            }
-                        }
-                    });
-                }
-
-                if (autoDetect == "on") {
-                    List1.forEach(function (name, i) {
-                        var nameA = name.toLowerCase().replace(/[^a-z]+/g, '');
-                        if (!Array.prototype.findIndex) { // for IE
-                            var result = -1;
-                            List2.forEach(function (x, j) {
-                                if (result == -1) {
-                                    var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-                                    if (nameA == nameB) {
-                                        result = j;
-                                    } else if (nameA == nameB.substring(0, nameA.length)) {
-                                        result = j;
-                                    }
-                                }
-                            });
-                        } else {
-                            var result = List2.findIndex(function (x) {
-                                var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-                                if (nameA == nameB) {
-                                    return true;
-                                } else {
-                                    return nameA == nameB.substring(0, nameA.length);
-                                }
-                            });
-                        }
-
-                        if (result != -1) {
-                            var infos = {};
-                            infos.offsetA = i;
-                            infos.nameA = name;
-                            infos.offsetB = result;
-                            infos.nameB = List2[result];
-                            makeLink(infos);
-                        }
-                    });
-                }
-              
-                $(window).resize(function () {
-                    canvasWidth = $(that).find(".FL-main .FL-mid").width();
-                    canvasPtr.width = canvasWidth;
-                    $("#" + canvasId).css("width", canvasWidth + "px");
-                    draw();
-                });
-                draw();
-            }
-            return (this);
-
-        } else if (action == "eraseLinks") {
-            linksByOrder.length = 0;
-            linksByName.length = 0;
-            draw();
-
-        } else if (action === "getLinks") {
-            if (!onError) {
-                var isMandatoryError = false;
-                var links = null;
-                var errorMessage = mandatoryErrorMessage + " : ";
-                var fieldInErrorName = "";
-                if (byName) {
-                    links = linksByName;
-                } else {
-                    links = linksByOrder;
-                }
-
-                Mandatories.forEach(function (m, i) {
-                    if (!isMandatoryError) {
-                        var match = linksByName.filter(function (link) {
-                            return link.to == m;
-                        });
-                        if (match.length == 0) {
-                            isMandatoryError = true;
-                            fieldInErrorName = m;
-                        }
-                    }
-                });
-
-                if (isMandatoryError) {
-                    return {
-                        "error": true,
-                        "errorMessage": errorMessage + fieldInErrorName,
-                        "links": []
-                    };
-                } else {
-
-                    return {
-                        "error": false,
-                        "errorMessage": "",
-                        "links": links
-                    };
-                }
-
-            } else {
-                return [];
-            }
-        } else if (action === "changeParameters") {
-            if (!onError) {
-                if (input) {
-                    var options = JSON.parse(JSON.stringify(input));
-
-                    if (options.className) {
-                        className = options.className;
-                    }
-
-                    if (options.byName) {
-                        byName = options.byName;
-                    }
-
-                    if (options.lineStyle) {
-                        lineStyle = options.lineStyle;
-                        draw();
-                    }
-
-                    if (options.lineColor) {
-                        lineColor = options.lineColor;
-                    }
-
-                    if (options.handleColor) {
-                        handleColor = options.handleColor;
-                    }
-
-                    if (options.oneToMany) {
-                        oneToMany = options.oneToMany;
-                        if (oneToMany == "off") {
-                            var links = linksByOrder.slice(0);
-                            for (var i = 0; i < links.length; i++) {
-                                links[i].fromName = linksByName[i]["from"];
-                                links[i].toName = linksByName[i]["to"];
-
-                            }
-                            links.sort(function (a, b) {
-                                return a["from"] >= b["from"];
-                            });
-
-                            for (var i = links.length - 1; i > 0; i--) {
-                                if (links[i]["from"] == links[i - 1]["from"]) {
-                                    links.splice(i, 1);
-                                }
-                            }
-
-                            linksByOrder = [];
-                            linksByName = [];
-
-                            links.forEach(function (x, i) {
-                                linksByOrder.push({ "from": x["from"], "to": x["to"] });
-                                linksByName.push({ "from": x["fromName"], "to": x["toName"] });
-                            });
-                        }
-                        draw();
-                    }
-                }
-                draw();
-            }
-        } else if (action == "disable") {
-            var that = this;
-            isDisabled = true;
-            $(that)
-                .find(".eraseLink")
-                .prop("disabled", isDisabled);
-
-            $(that)
-                .find("li")
-                .addClass("inactive");
-
-            globalAlpha = 0.5;
-
-            draw();
-
-            return (that);
-        }
-        else if (action == "enable") {
-            var that = this;
-            isDisabled = false;
-            $(that)
-                .find(".eraseLink")
-                .prop("disabled", isDisabled);
-
-            $(that)
-                .find("li")
-                .removeClass("inactive");
-
-            globalAlpha = 1;
-
-            draw();
-
-            return (that);
-        } else {
-            onError = true;
-            console.log(errMsg + "no action parameter provided (param 1)");
-        }
-    }
-}(jQuery));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-	            // Computing the vertical offset of the middle of each cell.
-	            $(this).find(".FL-main .FL-right li").each(function(i){
-	                var position = $(this).position();
-	                var hInner = $(this).height();
-	                var hOuter = $(this).outerHeight();
-	                var delta = Math.floor(0.5 + (hOuter - hInner)/2);
-	                var midInner = Math.floor(0.5 + hInner/2);
-	                var midHeight = position.top + midInner - delta;
-	                ListHeights2.push(midHeight);
-	            });
-				
-	            // Listeners :
-	            if (data.options.buttonErase) {
-	                $(this).find(".FL-main .eraseLink").on("click", function (e) {
-	                    if (isDisabled) return;
-	                    linksByOrder.length = 0;
-	                    linksByName.length = 0;
-	                    draw();
-	                    $("body").trigger({
-	                        type: "fieldLinkerUpdate",
-	                        what: "removeLink"
-	                    });
-	                });
-	            }
-				
-	            // On mousedown in left List : 
-	            $(this).find(".FL-main .FL-left li").on("mousedown",function(e){
-	                // we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
-	                if (isDisabled) return;
-	                move = {};
-	                move.offsetA = $(this).attr("data-offset");
-	                move.nameA = $(this).attr("data-name");
-	                move.offsetB = -1;
-	                move.nameB = -1;
-	            });
-				
-	            $(this).find(".FL-main .FL-left li .unlink").on("click", function (e) {
-	                if (isDisabled) return;
-	                eraseLinkA($(this).parent().attr("data-offset"));	
-	                draw();
-	            });
-				
-	            $(this).find(".FL-main .FL-left li").on("mouseup", function (e) {
-	                if (isDisabled) return;
-	                // We do a mouse up on le teft side : the drag is canceled
-	                move=null;
-	            });
-				
-	            // Mouse up on the right side 
-	            $(this).find(".FL-main .FL-right li").on("mouseup", function (e) {
-					var that = this;
-	                if (isDisabled) return;
-	                if(move == null){ // no drag 
-						
-				eraseLinkB($(that).attr("data-offset")); // we erase an existing link if any
-				draw();
-
-	                }else{ // we finish a drag then get the infos an create a link
-						if(!$(that).hasClass("inactive")){
-							eraseLinkB($(that).attr("data-offset")); // we erase an existing link if any
-							move.offsetB = $(that).attr("data-offset");
-							move.nameB = $(that).attr("data-name");
-							var infos =  JSON.parse(JSON.stringify(move));
-							move = null;
-							makeLink(infos);
-						}
-	                }
-	            });
-				
-	            // mousemove over a right cell
-	            $(this).find(".FL-main .FL-right li").on("mousemove",function(e){
-	                if (isDisabled) return;
-	                if(move != null){ // drag occuring
-			
-	                    var _from = move.offsetA;
-						 
-	                    var Ax = 0;
-	                    var Ay = ListHeights1[_from];
-						 
-	                    var Bx = canvasWidth;
-			    var By = ListHeights2[_To];
-	                    		 
-	                    draw();
-	                    canvasCtx.beginPath(); 
-	                    var color= handleColor[_from%handleColor.length];
-	                    canvasCtx.fillStyle = 'white';
-	                    canvasCtx.strokeStyle = color;
-						
-	                    canvasCtx.moveTo(Ax, Ay);
-	                    canvasCtx.lineTo(Bx, By);
-	                    canvasCtx.stroke();
-	                }
-	            });
-				
-	            // mousemove over the canvas
-	            $(this).find("canvas").on("mousemove", function (e) {
-	                if (isDisabled) return;
-	                if(move != null){
-	                    canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-	                    // we redraw all the existing links
-	                    draw();
-	                    canvasCtx.beginPath(); 
-	                    // we draw the new would-be link
-	                    var _from = move.offsetA;
-	                    var color= handleColor[_from%handleColor.length];
-	                    canvasCtx.fillStyle = 'white';
-	                    canvasCtx.strokeStyle = color;
-						
-	                    var Ax = 0;
-	                    var Ay = ListHeights1[_from];
-	                    // mouse position relative to the canvas
-	                    var Bx = e.offsetX;
-	                    var By = e.offsetY;
-						
-	                    canvasCtx.moveTo(Ax, Ay);
-	                    canvasCtx.lineTo(Bx, By);
-	                    canvasCtx.stroke();
-	                }
-	            });
-				
-	            $(this).find(".FL-main").on("mouseup", function (e) {
-	                if (isDisabled) return;
-	                if(move!=null){
-	                    move = null;
-	                    draw();
-	                }
-	            });
-				
-	            if(data.existingLinks){
-	                data.existingLinks.forEach(function(link){
-	                    var pos = -1;
-	                    if(byName){
-	                        var offA = List1.indexOf(link["from"]);
-	                        var offB = List2.indexOf(link["to"]);
-	                        if(offA !=-1 && offB!=-1){
-	                            var linkWithOffset = {
-	                                "from": offA,
-	                                "to": offB,
-	                            }
-	                            linksByName.push(link);
-	                            linksByOrder.push(linkWithOffset);
-	                        }
-	                    }else{
-	                        var offA = link["from"];
-	                        var offB = link["to"];
-	                        if(offA < List1.length && offB < List2.length){
-	                            var linkWithNames = {
-	                                "from":List1[offA],
-	                                "to": List2[offB]
-	                            }
-	                            linksByOrder.push(link);
-	                            linksByName.push(linkWithNames);				
-	                        }
-	                    }
-	                });
-	            }	
-				root = $(this).attr("id");
-	            if(autoDetect=="on"){
-	                List1.forEach(function(name,i){
-	                    var nameA = name.toLowerCase().replace(/[^a-z]+/g, '');
-	                    if (!Array.prototype.findIndex){ // for IE
-	                        var result = -1;
-	                        List2.forEach(function(x,j){
-	                            if(result==-1){
-	                                var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-	                                if(nameA == nameB){
-	                                    result = j;
-	                                }else if(nameA == nameB.substring(0,nameA.length)){
-	                                    result = j;
-	                                }
-	                            }
-	                        });
-	                    }else{
-	                        var result = List2.findIndex(function(x){
-	                            var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-	                            if(nameA == nameB){
-	                                return true;
-	                            }else{
-	                                return nameA == nameB.substring(0,nameA.length);
-	                            }
-	                        });	
-	                    }
->>>>>>> .theirs
-
-                    var position = $(this).position();
-                    var hInner = $(this).height();
-                    var hOuter = $(this).outerHeight();
-
                     var delta = (hOuter - hInner) / 2;
-                    var midInner =  hInner / 2;
-                    var midHeight = Math.round(position.top + midInner - delta);
-                    ListHeights1.push(midHeight);
-                    if (i == 0) {
-                        canvasTopMargin += position.top;
-                    }
-                });
-
-                $canvas
-                    .css("margin-top", canvasTopMargin + "px");
-
-                // Computing the vertical offset of the middle of each cell.
-                $(this).find(".FL-main .FL-right li").each(function (i) {
-                    var position = $(this).position();
-                    var hInner = $(this).height();
-                    var hOuter = $(this).outerHeight();
-                    var delta =(hOuter - hInner) / 2;
-                    var midInner =  hInner / 2;
+                    var midInner = hInner / 2;
                     var midHeight = Math.round(position.top + midInner - delta);
                     ListHeights2.push(midHeight);
                 });
 
                 // Listeners :
                 if (effectHover == "on") {
-                    effectHoverDefaultBorderLeft = $(this).find(".FL-main .FL-left li").first().css("border");
-                    effectHoverDefaultBorderRight = $(this).find(".FL-main .FL-right li").first().css("border");
+
 
                     $(this).find(".FL-main .FL-left li").hover(function (e) {
                         if (isDisabled) return;
@@ -1424,7 +687,7 @@
                         }
                     });
                 }
-              
+
                 $(window).resize(function () {
                     canvasWidth = $(that).find(".FL-main .FL-mid").width();
                     canvasPtr.width = canvasWidth;
