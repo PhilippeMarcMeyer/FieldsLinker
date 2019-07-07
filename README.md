@@ -10,7 +10,7 @@ the jquery plugin allows you to draw and save links between the 2 lists
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
-
+v 0.72 : New lineStyle : square-ends-dotted : white dots at the beginings and ends of lines on hover
 v 0.60 : 
 Mandatory fields show a tooltip (mandatoryErrorMessage)
 disable/enable : disable/enable everything, the global opacity is set to 0.5
