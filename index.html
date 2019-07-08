@@ -185,46 +185,47 @@
 			    "localization":{
  				},
 			    "options":{
-					"byName" : true,
+					"associationMode":"manyToMany", // oneToOne,manyToMany
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
 					"autoDetect":"off",
 					"effectHover": "on",
                     "effectHoverBorderWidth" : 2
 				},
-				"listA":
-					{
-						"name":"Columns in files",
-						"list" : [
-							"firstName",
-							"lastName",
-							"phone",
-							"email",
-							"role",
-							"Birthday",
-							"Adress",
-							"Sales",
-							"City"
+					"Lists":[
+						{
+							"name":"Columns in files",
+							"list" : [
+								"firstName",
+								"lastName",
+								"phone",
+								"email",
+								"role",
+								"Birthday",
+								"Adress",
+								"Sales",
+								"City"
+							]
+						},
+						{
+							"name":"Available Fields",
+							"list" : [
+								"Company",
+								"jobTitle",
+								"adress 1",	
+								"adress 2",	
+								"first_name",
+								"last_name",
+								"email_adress",
+								"Phone number"
+							],
+							"mandatories" :[
+								"last_name",
+								"email_adress"
+							]
+						}
 						]
-					},
-				"listB":
-					{
-						"name":"Available Fields",
-						"list" : [
-							"Company",
-							"jobTitle",
-							"adress 1",	
-							"adress 2",	
-							"first_name",
-							"last_name",
-							"email_adress",
-							"Phone number"
-						],
-						"mandatories" :[
-							"last_name",
-							"email_adress"
-						]
-					},
+
 					//"existingLinks" : [{"from":"firstName","to":"first_name"}]
 			};
 			

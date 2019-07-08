@@ -1,861 +1,816 @@
 /* 
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.72 : New lineStyle : square-ends-dotted : white dots at the beginings and ends of lines on hover
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.8 
 
 */
+let FL_Factory_Lists = null;
 
-(function ($) {
-    const errMsg = "fieldsLinker error : "
-    var data, canvasId, canvasCtx, canvasPtr, canvasWidth, canvasHeight, onError, className, byName, linksByOrder, linksByName, List1, List2, Mandatories, ListHeights1, ListHeights2, move, that, lineStyle, handleColor, lineColor, autoDetect, oneToMany, mandatoryErrorMessage, mandatoryTooltips, canvasTopOffset, isDisabled, globalAlpha, effectHover, effectHoverBorderWidth, effectHoveredLink, topContext;
-
-    var setDefaults = function () {
-
-        data = {};
-        canvasId = "";
-        canvasCtx = null;
-        canvasPtr = null;
-        canvasWidth = 0;
-        canvasHeight = 0;
-        onError = false;
-        className = "fieldsLinker";
-        byName = false;
-        linksByOrder = [];
-        linksByName = [];
-        List1 = [];
-        List2 = [];
-        Mandatories = [];
-        ListHeights1 = [];
-        ListHeights2 = [];
-        move = null;
-        that = null;
-        lineStyle = "straight"; // straight or square-ends
-        handleColor = "#0000AD,#00AD00,#FF4500,#AD00AD,#244FBD,#582900,#FFCC00,#000000,#33FFCC,#FF0096,#666666".split(",");
-        lineColor = "black";
-        autoDetect = "off";
-        oneToMany = "off";
-        mandatoryErrorMessage = "This field is mandatory";
-        mandatoryTooltips = true;
-        canvasTopOffset = 0;
-        isDisabled = false;
-        globalAlpha = 1;
-        effectHover = "off";
-        effectHoverBorderWidth = 2;
-        effectHoveredLink = -1;
-    }
+(function ( $ ) {
+	const errMsg  = "fieldsLinker error : "
+	var factory;
+	var data = {};
+	var listsNr = 0;
+	var listNames = [];
+	var listA = [];
+	var listB = [];
+	var chosenListA = ""
+	var chosenListB = ""
 	
-	const TWO_PI = Math.PI*2;
+	var dropDownForLists = null;
+	var canvasTopMarg = 0;
+	var $leftDiv,$midDiv,$rightDiv,$canvas;
+	
+	var canvasId = "";
+	var canvasCtx = null;
+	var canvasPtr = null;
+	var canvasWidth = 0;
+	var canvasHeight = 0;
+	var canvasTopMargin;
+	
+	
+	
+	var onError = false;
+	var className = "fieldsLinker";
+	
+	var linksByName=[];
 
-    var draw = function () {
+	
+	var ListHeights1 = [];
+	var ListHeights2 = [];	
+	var move = null;
+	var that = null;
+	var lineStyle = "straight"; // straight or square-ends
+	var handleColor = "#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC".split(",");
+	var lineColor = "black";
+	var autoDetect = "off";
+	var associationMode = "oneToOne";
+	var canvasTopOffset = 0;
+	var isDisabled = false;
+	var globalAlpha = 1;
+		
+	var draw = function () {
+		
+		var tablesAB = chosenListA+"|"+chosenListB;
 
-        canvasCtx.globalAlpha  = 1 //= globalAlpha;
-        canvasCtx.beginPath();
-        canvasCtx.fillStyle = 'white';
-        canvasCtx.strokeStyle = lineColor;
-        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-        var links = linksByOrder.slice(0);
-        links.sort(function (a, b) {
-            return a["from"] >= b["from"];
-        });
-
-        links.forEach(function (item, i) {
-            let isOver = false;
-            var _from = item["from"];
-            var _to = item["to"];
-
-            var Ax = 0;
-            var Ay = ListHeights1[_from];
-
-            var Bx = canvasWidth;
-            var By = ListHeights2[_to];
-
-            canvasCtx.beginPath();
-
-            if (effectHoveredLink == _from) {
-                canvasCtx.lineWidth = effectHoverBorderWidth + 1;
-            } else {
-                canvasCtx.lineWidth = 1;
-            }
-            canvasCtx.moveTo(Ax, Ay);
-            var handleCurrentColor = handleColor[_from % handleColor.length];
-            if (lineStyle == "square-ends" || lineStyle == "square-ends-dotted") {
-                canvasCtx.fillStyle = handleCurrentColor;
-                canvasCtx.strokeStyle = handleCurrentColor;
-                canvasCtx.rect(Ax, Ay - 4, 8, 8);
-                canvasCtx.rect(Bx - 8, By - 4, 8, 8);
-                canvasCtx.fill();
-				canvasCtx.stroke();
-                canvasCtx.moveTo(Ax + 8, Ay);
-                canvasCtx.lineTo(Ax + 16, Ay);
-                canvasCtx.lineTo(Bx - 16, By);
-                canvasCtx.lineTo(Bx - 8, By);
-                canvasCtx.stroke();
-            } else {
-                canvasCtx.strokeStyle = handleCurrentColor;
-                canvasCtx.lineTo(Bx, By);
-                canvasCtx.stroke();
-            }
-            canvasCtx.closePath();
+		//{"tables":tablesAB,"from":infos.nameA,"to":infos.nameB}
+	    canvasCtx.globalAlpha = globalAlpha;
+		canvasCtx.beginPath(); 
+		canvasCtx.fillStyle = 'white';
+		canvasCtx.strokeStyle = lineColor;
+		canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 			
-			 if (effectHoveredLink == _from && lineStyle == "square-ends-dotted") {
-				  canvasCtx.beginPath();
-				  canvasCtx.arc(Ax+effectHoverBorderWidth+1, Ay,effectHoverBorderWidth, 0, TWO_PI, false);
-				  canvasCtx.fillStyle = "white";
-				  canvasCtx.fill();
-				  canvasCtx.arc(Bx-effectHoverBorderWidth-1, By,effectHoverBorderWidth, 0, TWO_PI, false);
-				  canvasCtx.fillStyle = "white";
-				  canvasCtx.fill();
-			 }
-			 canvasCtx.lineWidth =  1;	
-
-        });
-    }
-
-    var removerOverEffect = function (offsetA,offsetB) {
-        var listsToClean = [".FL-main .FL-left li", ".FL-main .FL-right li"];
-        if (offsetA == undefined) offsetA = -1;
-        if (offsetB == undefined) offsetB = -1;
-        var offsets = [offsetA, offsetB];
-        listsToClean.forEach(function (listToClean, i) {
-            var offset = offsets[i];
-            var $LIs;
-            if (offset == -1) {
-                $LIs = $(topContext).find(listToClean);
-            } else {
-                $LIs = $(topContext).find(listToClean).eq(offset);
-            }
-            $LIs.each(function () {
-                $(this).removeClass("linkOver");
-                var styleAttribute = $(this).attr("style");
-                if (!styleAttribute) styleAttribute = ""
-                var styles = styleAttribute.split(";");
-                if (styles.length > 0) {
-                    var style = "";
-                    styles.forEach(function (item) {
-                        item = item.replace(/ /g, "");
-                        if (item != "" && item.indexOf("border-color:") == -1) {
-                            style += item + ";"
-                        }
-                    });
-                    $(this).attr("style", style);
-                }
-            });
-
-        });
-    }
-
-    var makeLink = function (infos) {
-        if (oneToMany == "off") {
-            // If the link already exists then we erase it
-            eraseLinkA(infos.offsetA);
-            eraseLinkB(infos.offsetB);
-        }
-
-        linksByOrder.push({ "from": infos.offsetA, "to": infos.offsetB });
-        linksByName.push({ "from": infos.nameA, "to": infos.nameB });
-        draw();
-
-        $("body").trigger({
-            type: "fieldLinkerUpdate",
-            what: "addLink"
-        });
-    }
-
-    var eraseLinkA = function (offset) {
-
-        var pos = -1;
-        linksByOrder.forEach(function (x, i) {
-            if (x.from == offset) {
-                pos = i;
-            }
-        });
-        if (pos != -1) {
-            linksByOrder.splice(pos, 1);
-            linksByName.splice(pos, 1);
-            draw();
-        }
-        $("body").trigger({
-            type: "fieldLinkerUpdate",
-            what: "removeLink"
-        });
-
-        removerOverEffect();
-    }
-
-    var eraseLinkB = function (offset) {
-
-        var pos = -1;
-        linksByOrder.forEach(function (x, i) {
-            if (x.to == offset) {
-                pos = i;
-            }
-        });
-        if (pos != -1) {
-            linksByOrder.splice(pos, 1);
-            linksByName.splice(pos, 1);
-            draw();
-        }
-        $("body").trigger({
-            type: "fieldLinkerUpdate",
-            what: "removeLink"
-        });
-
-        removerOverEffect();
-    }
-
-    var hoverEffect = function (onOff, link) { // triggered by the LI elements only, not the canvas
-        that = this;
-        if (onOff == "on") {
-            var handleCurrentColor = handleColor[link.from % handleColor.length];
-            $(that).find(".FL-main .FL-left li[data-offset='" + link.from + "']").addClass("linkOver").css("border-color", handleCurrentColor);
-            $(that).find(".FL-main .FL-right li[data-offset='" + link.to + "']").addClass("linkOver").css("border-color", handleCurrentColor);
-            effectHoveredLink = link.from;
-
-        } else {
-            if (effectHoveredLink == link.from) {
-                effectHoveredLink = -1;
-            }
-            removerOverEffect(link.from, link.to);
-        }
-        draw();
-    }
-
-    /*Adapted from http://benmoren.com p5.collide2d.js the librairy for p5.js*/
-
-    var collidePointLine = function (px, py, x1, y1, x2, y2, buffer) {
-        // get distance from the point to the two ends of the line
-        var d1 = dist(px, py, x1, y1);
-        var d2 = dist(px, py, x2, y2);
-
-        // get the length of the line
-        var lineLen = dist(x1, y1, x2, y2);
-
-        // since floats are so minutely accurate, add a little buffer zone that will give collision
-        if (buffer === undefined) { buffer = 0.1; }   // higher # = less accurate
-
-        // if the two distances are equal to the line's length, the point is on the line!
-        // note we use the buffer here to give a range, rather than one #
-        if (d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer) {
-            return true;
-        }
-        return false;
-    }
-
-    var dist = function (x1, y1, x2, y2) {
-        var diffX = x2 - x1;
-        var diffY = y2 - y1;
-        return Math.sqrt(diffX * diffX + diffY * diffY);
-    }
-
-    $.fn.fieldsLinker = function (action, input) {
-        that = this; // keep the context for listeners
-      
-        if (action == "init") {
-            if (!input) {
-                onError = true;
-                console.log(errMsg + "no input parameter provided (param 2)");
-            }
-            if (input) {
-                setDefaults();
-                data = JSON.parse(JSON.stringify(input));
-                if (data.options.className) {
-                    className = data.options.className;
-                }
-                if (data.options.byName) {
-                    byName = data.options.byName;
-                }
-
-                if (data.localization) {
-                    if (data.localization.mandatoryErrorMessage) {
-                        mandatoryErrorMessage = data.localization.mandatoryErrorMessage;
-                    }
-                }
-
-                if (data.options.lineStyle) {
-                    if (data.options.lineStyle == "square-ends" || data.options.lineStyle == "square-ends-dotted")
-                        lineStyle = data.options.lineStyle;
-                }
-
-                if (data.options.lineColor) {
-                    lineColor = data.options.lineColor;
-                }
-
-                if (data.options.handleColor) {
-                    handleColor = data.options.handleColor.split(",");
-                }
-
-                if (data.options.autoDetect) {
-                    autoDetect = data.options.autoDetect;
-                }
-
-                if (data.options.oneToMany) {
-                    oneToMany = data.options.oneToMany;
-                }
-
-                if (data.options.canvasTopOffset) {
-                    canvasTopOffset = data.options.canvasTopOffset;
-                }
-
-                if (data.options.effectHover) {
-                    effectHover = data.options.effectHover;
-
-                    if (data.options.effectHoverBorderWidth != undefined) {
-                        effectHoverBorderWidth = data.options.effectHoverBorderWidth;
-                    }
-                }
-
-                $(this).html("");
-				topContext = this;
-                var $main = $("<div></div>");
-                $main
-					.appendTo($(this))
-					.addClass("FL-main " + className)
-					.css({ "position": "relative", "width": "100%", "text-align": "left" });
-
-                var $leftDiv = $("<div></div>");
-                $leftDiv
-					.appendTo($main)
-					.addClass("FL-left")
-					.css({ "float": "left", "width": "40%", "display": "inline-block", "text-align": "left", "white-space": "nowrap" })
-					.html(data.listA.name);
-
-                var $midDiv = $("<div></div>");
-                $midDiv
-					.appendTo($main)
-					.addClass("FL-mid")
-					.css({ "display": "inline-block", "width": "20%" });
-
-                var $rightDiv = $("<div></div>");
-                $rightDiv
-					.appendTo($main)
-					.addClass("FL-right")
-					.css({ "float": "right", "width": "40%", "display": "inline-block", "text-align": "left", "white-space": "nowrap" })
-					.html(data.listB.name);
-
-                var $ul = $("<ul></ul>");
-                $ul
-					.appendTo($leftDiv)
-					.css({ "text-align": "left", "list-style": "none" })
-
-                data.listA.list.forEach(function (x, i) {
-                    List1.push(x);
-                    var $li = $("<li></li>");
-                    $li
-						.appendTo($ul)
-						.attr("data-offset", i)
-						.attr("data-name", x)
-						.css({ "width": "100%", "position": "relative" })
-						.text(x);
-
-                    var $eraseIcon = $("<i></i>");
-                    $eraseIcon
-						.appendTo($li)
-						.addClass("fa fa-undo unlink")
-						.css({ "right": "28px", "color": "#aaa", "position": "absolute", "top": "50%", "transform": "translateY(-50%)" });
-                    var $pullIcon = $("<i></i>");
-                    $pullIcon
-						.appendTo($li)
-						.addClass("fa fa-arrows-alt link")
-						.css({ "right": "8px", "color": "#aaa", "position": "absolute", "top": "50%", "transform": "translateY(-50%)" });
-                });
-
-                if (data.options.buttonErase) {
-                    var $btn = $("<button></button>");
-                    $btn
-						.appendTo($(this).find(".FL-main"))
-						.attr("type", "button")
-						.addClass("btn btn-danger  btn-sm eraseLink")
-						.html(data.options.buttonErase);
-                }
-
-                var $ul = $("<ul></ul>");
-                $ul
-					.appendTo($rightDiv)
-					.css({ "text-align": "left", "list-style": "none" })
-
-                Mandatories = [];
-                if (data.listB.mandatories) {
-                    Mandatories = data.listB.mandatories.slice(0);
-                }
-                data.listB.list.forEach(function (x, i) {
-                    List2.push(x);
-
-                    var isMandatory = (Mandatories.indexOf(x) != -1);
-
-                    var $li = $("<li></li>");
-                    $li
-						.appendTo($ul)
-						.attr("data-offset", i)
-						.attr("data-name", x)
-						.attr("data-mandatory", isMandatory)
-						.text(x);
-
-                    if (isMandatory && mandatoryTooltips) {
-                        $li
-                            .attr("data-placement", "top")
-                            .attr("title", mandatoryErrorMessage);
-
-                        $li.tooltip();
-                    }
-                });
-
-                canvasId = "cnv_" + Date.now();
-
-                var w = $midDiv.width();
-                var h2 = $rightDiv.height();
-                var h1 = $leftDiv.height();
-                var h = h1 >= h2 ? h1 : h2;
-                var $canvas = $("<canvas></canvas>");
-
-                $canvas
-					.appendTo($midDiv)
-					.attr("id", canvasId)
-					.css({ "width": w + "px", "height": h + "px" });
-
-                canvasWidth = w;
-                canvasHeight = h;
-                canvasPtr = document.getElementById(canvasId);
-                canvasPtr.width = canvasWidth;
-                canvasPtr.height = canvasHeight;
-                canvasCtx = canvasPtr.getContext("2d");
-
-                var canvasTopMargin = canvasTopOffset;
-
-                // Computing the vertical offset of the middle of each cell.
-                $(this).find(".FL-main .FL-left li").each(function (i) {
-
-                    var position = $(this).position();
-                    var hInner = $(this).height();
-                    var hOuter = $(this).outerHeight();
-
-                    var delta = (hOuter - hInner) / 2;
-                    var midInner = hInner / 2;
-                    var midHeight = Math.round(position.top + midInner - delta);
-                    ListHeights1.push(midHeight);
-                    if (i == 0) {
-                        canvasTopMargin += position.top;
-                    }
-                });
-
-                $canvas
-                    .css("margin-top", canvasTopMargin + "px");
-
-                // Computing the vertical offset of the middle of each cell.
-                $(this).find(".FL-main .FL-right li").each(function (i) {
-                    var position = $(this).position();
-                    var hInner = $(this).height();
-                    var hOuter = $(this).outerHeight();
-                    var delta = (hOuter - hInner) / 2;
-                    var midInner = hInner / 2;
-                    var midHeight = Math.round(position.top + midInner - delta);
-                    ListHeights2.push(midHeight);
-                });
-
-                // Listeners :
-                if (effectHover == "on") {
-
-
-                    $(this).find(".FL-main .FL-left li").hover(function (e) {
-                        if (isDisabled) return;
-
-                        var offsetA = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            hoverEffect.call(that, "off", x);
-                            if (x.from == offsetA) {
-                                hoverEffect.call(that, "on", x);
-                            }
-                        });
-
-                    }, function (e) {
-                        if (isDisabled) return;
-
-                        var offsetA = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.from == offsetA) {
-                                hoverEffect.call(that, "off", x);
-                            }
-                        });
-                    });
-
-                    $(this).find(".FL-main .FL-right li").hover(function (e) {
-                        if (isDisabled) return;
-
-                        var offsetB = $(this).data("offset");
-
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.to == offsetB) {
-                                hoverEffect.call(that, "on", x);
-                            }
-                        });
-
-                    }, function (e) {
-                        if (isDisabled) return;
-                        var offsetB = $(this).data("offset");
-                        linksByOrder.forEach(function (x, i) {
-                            if (x.to == offsetB) {
-                                hoverEffect.call(that, "off", x);
-                            }
-                        });
-                    });
-                }
-
-                if (data.options.buttonErase) {
-                    $(this).find(".FL-main .eraseLink").on("click", function (e) {
-                        if (isDisabled) return;
-                        linksByOrder.length = 0;
-                        linksByName.length = 0;
-                        draw();
-                        $("body").trigger({
-                            type: "fieldLinkerUpdate",
-                            what: "removeLink"
-                        });
-                    });
-                }
-
-                // On mousedown in left List : 
-                $(this).find(".FL-main .FL-left li").on("mousedown", function (e) {
-                    // we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
-                    if (isDisabled) return;
-                    move = {};
-                    move.offsetA = $(this).data("offset");
-                    move.nameA = $(this).data("name");
-                    move.offsetB = -1;
-                    move.nameB = -1;
-                });
-
-                $(this).find(".FL-main .FL-left li .unlink").on("click", function (e) {
-                    if (isDisabled) return;
-                    eraseLinkA($(this).parent().data("offset"));
-                    draw();
-                });
-
-                $(this).find(".FL-main .FL-left li").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    // We do a mouse up on le teft side : the drag is canceled
-                    move = null;
-                });
-
-                // Mouse up on the right side 
-                $(this).find(".FL-main .FL-right li").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    if (move == null) { // no drag 
-                        eraseLinkB($(this).data("offset")); // we erase an existing link if any
-                        draw();
-                    } else { // we finish a drag then get the infos an create a link
-                        eraseLinkB($(this).data("offset")); // we erase an existing link if any
-                        move.offsetB = $(this).data("offset");
-                        move.nameB = $(this).data("name");
-                        var infos = JSON.parse(JSON.stringify(move));
-                        move = null;
-                        makeLink(infos);
-                    }
-                });
-
-                // mousemove over a right cell
-                $(this).find(".FL-main .FL-right li").on("mousemove", function (e) {
-                    if (isDisabled) return;
-                    if (move != null) { // drag occuring
-
-                        var _from = move.offsetA;
-                        var _To = $(this).data("offset");
-
-                        var Ax = 0;
-                        var Ay = ListHeights1[_from];
-
-                        var Bx = canvasWidth;
-                        var By = ListHeights2[_To];
-
-                        draw();
-                        canvasCtx.beginPath();
-                        var color = handleColor[_from % handleColor.length];
-                        canvasCtx.fillStyle = 'white';
-                        canvasCtx.strokeStyle = color;
-
-                        canvasCtx.moveTo(Ax, Ay);
-                        canvasCtx.lineTo(Bx, By);
-                        canvasCtx.stroke();
-                    }
-                });
-
-                // mousemove over the canvas
-                $(this).find("canvas").on("mousemove", function (e) {
-                    var that = this;
-                    if (isDisabled) return;
-                    if (move != null) {
-                        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-                        // we redraw all the existing links
-                        draw();
-                        canvasCtx.beginPath();
-                        // we draw the new would-be link
-                        var _from = move.offsetA;
-                        var color = handleColor[_from % handleColor.length];
-                        canvasCtx.fillStyle = 'white';
-                        canvasCtx.strokeStyle = color;
-
-                        var Ax = 0;
-                        var Ay = ListHeights1[_from];
-                        // mouse position relative to the canvas
-                        var Bx = e.offsetX;
-                        var By = e.offsetY;
-
-                        canvasCtx.moveTo(Ax, Ay);
-                        canvasCtx.lineTo(Bx, By);
-                        canvasCtx.stroke();
-                    } else {
-
-                        var rect = canvasPtr.getBoundingClientRect();
-                        var mouseX = e.clientX - rect.left;
-                        var mouseY = e.clientY - rect.top;
-                        effectHoveredLinks = -1;
-                        linksByOrder.forEach(function (link, i) {
-                            var _from = link.from;
-                            var _to = link.to;
-
-                            var Ax = 0;
-                            var Ay = ListHeights1[_from];
-
-                            var Bx = canvasWidth;
-                            var By = ListHeights2[_to];
-
-                            var hit = collidePointLine(mouseX, mouseY, Ax, Ay, Bx, By, 0.5);
-
-                            if (hit) {
-                                $(topContext).find(".FL-main .FL-left li[data-offset='" + link.from + "']").trigger("mouseenter");
-                            } else {
-                                $(topContext).find(".FL-main .FL-left li[data-offset='" + link.from + "']").trigger("mouseleave");
-                            }
-                        });
-                    }
-                });
-
-                $(this).find(".FL-main").on("mouseup", function (e) {
-                    if (isDisabled) return;
-                    if (move != null) {
-                        move = null;
-                        draw();
-                    }
-                });
-
-                if (data.existingLinks) {
-                    data.existingLinks.forEach(function (link) {
-                        var pos = -1;
-                        if (byName) {
-                            var offA = List1.indexOf(link["from"]);
-                            var offB = List2.indexOf(link["to"]);
-                            if (offA != -1 && offB != -1) {
-                                var linkWithOffset = {
-                                    "from": offA,
-                                    "to": offB,
-                                }
-                                linksByName.push(link);
-                                linksByOrder.push(linkWithOffset);
-                            }
-                        } else {
-                            var offA = link["from"];
-                            var offB = link["to"];
-                            if (offA < List1.length && offB < List2.length) {
-                                var linkWithNames = {
-                                    "from": List1[offA],
-                                    "to": List2[offB]
-                                }
-                                linksByOrder.push(link);
-                                linksByName.push(linkWithNames);
-                            }
-                        }
-                    });
-                }
-
-                if (autoDetect == "on") {
-                    List1.forEach(function (name, i) {
-                        var nameA = name.toLowerCase().replace(/[^a-z]+/g, '');
-                        if (!Array.prototype.findIndex) { // for IE
-                            var result = -1;
-                            List2.forEach(function (x, j) {
-                                if (result == -1) {
-                                    var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-                                    if (nameA == nameB) {
-                                        result = j;
-                                    } else if (nameA == nameB.substring(0, nameA.length)) {
-                                        result = j;
-                                    }
-                                }
-                            });
-                        } else {
-                            var result = List2.findIndex(function (x) {
-                                var nameB = x.toLowerCase().replace(/[^a-z]+/g, '');
-                                if (nameA == nameB) {
-                                    return true;
-                                } else {
-                                    return nameA == nameB.substring(0, nameA.length);
-                                }
-                            });
-                        }
-
-                        if (result != -1) {
-                            var infos = {};
-                            infos.offsetA = i;
-                            infos.nameA = name;
-                            infos.offsetB = result;
-                            infos.nameB = List2[result];
-                            makeLink(infos);
-                        }
-                    });
-                }
-
-                $(window).resize(function () {
-                    canvasWidth = $(that).find(".FL-main .FL-mid").width();
-                    canvasPtr.width = canvasWidth;
-                    $("#" + canvasId).css("width", canvasWidth + "px");
-                    draw();
-                });
-                draw();
-            }
-            return (this);
-
-        } else if (action == "eraseLinks") {
-            linksByOrder.length = 0;
-            linksByName.length = 0;
-            draw();
-
-        } else if (action === "getLinks") {
-            if (!onError) {
-                var isMandatoryError = false;
-                var links = null;
-                var errorMessage = mandatoryErrorMessage + " : ";
-                var fieldInErrorName = "";
-                if (byName) {
-                    links = linksByName;
-                } else {
-                    links = linksByOrder;
-                }
-
-                Mandatories.forEach(function (m, i) {
-                    if (!isMandatoryError) {
-                        var match = linksByName.filter(function (link) {
-                            return link.to == m;
-                        });
-                        if (match.length == 0) {
-                            isMandatoryError = true;
-                            fieldInErrorName = m;
-                        }
-                    }
-                });
-
-                if (isMandatoryError) {
-                    return {
-                        "error": true,
-                        "errorMessage": errorMessage + fieldInErrorName,
-                        "links": []
-                    };
-                } else {
-
-                    return {
-                        "error": false,
-                        "errorMessage": "",
-                        "links": links
-                    };
-                }
-
-            } else {
-                return [];
-            }
-        } else if (action === "changeParameters") {
-            if (!onError) {
-                if (input) {
-                    var options = JSON.parse(JSON.stringify(input));
-
-                    if (options.className) {
-                        className = options.className;
-                    }
-
-                    if (options.byName) {
-                        byName = options.byName;
-                    }
-
-                    if (options.lineStyle) {
-                        lineStyle = options.lineStyle;
-                        draw();
-                    }
-
-                    if (options.lineColor) {
-                        lineColor = options.lineColor;
-                    }
-
-                    if (options.handleColor) {
-                        handleColor = options.handleColor;
-                    }
-
-                    if (options.oneToMany) {
-                        oneToMany = options.oneToMany;
-                        if (oneToMany == "off") {
-                            var links = linksByOrder.slice(0);
-                            for (var i = 0; i < links.length; i++) {
-                                links[i].fromName = linksByName[i]["from"];
-                                links[i].toName = linksByName[i]["to"];
-
-                            }
-                            links.sort(function (a, b) {
-                                return a["from"] >= b["from"];
-                            });
-
-                            for (var i = links.length - 1; i > 0; i--) {
-                                if (links[i]["from"] == links[i - 1]["from"]) {
-                                    links.splice(i, 1);
-                                }
-                            }
-
-                            linksByOrder = [];
-                            linksByName = [];
-
-                            links.forEach(function (x, i) {
-                                linksByOrder.push({ "from": x["from"], "to": x["to"] });
-                                linksByName.push({ "from": x["fromName"], "to": x["toName"] });
-                            });
-                        }
-                        draw();
-                    }
-                }
-                draw();
-            }
-        } else if (action == "disable") {
-            var that = this;
-            isDisabled = true;
-            $(that)
+		var links = linksByName.filter(function(x){
+			return x.tables == tablesAB;
+			
+		});	
+
+		
+		links.forEach(function(item,i){
+			var positionA = listA.indexOf(item.from);
+			var positionB = listB.indexOf(item.to);
+			
+			if(positionB == -1 || positionA == -1){
+				console.log("error link names unknown");
+				return;
+			}
+			var Ax = 0;
+			var Ay = ListHeights1[positionA];
+
+			var Bx = canvasWidth;
+			var By = ListHeights2[positionB];
+		
+			canvasCtx.beginPath(); 
+			
+			canvasCtx.moveTo(Ax, Ay);
+			var handleCurrentColor = handleColor[positionA%handleColor.length];
+			if(lineStyle == "square-ends"){
+				canvasCtx.fillStyle = handleCurrentColor;
+				canvasCtx.strokeStyle = handleCurrentColor;
+				canvasCtx.rect(Ax, Ay-4, 8, 8);
+				canvasCtx.rect(Bx-8, By-4, 8, 8);
+				canvasCtx.fill();
+				
+				canvasCtx.moveTo(Ax+8, Ay);
+				canvasCtx.lineTo(Ax+16, Ay);
+				canvasCtx.lineTo(Bx-16, By);
+				canvasCtx.lineTo(Bx-8, By);
+				canvasCtx.stroke();
+			}else{
+				canvasCtx.strokeStyle = handleCurrentColor;
+				canvasCtx.lineTo(Bx, By);
+				canvasCtx.stroke();
+			}
+			
+		});
+	}
+		
+	var makeLink  = function(infos){
+		var tablesAB = chosenListA+"|"+chosenListB;
+		var already = false;
+		
+		var test = linksByName.filter(function(x){
+			return x.tables == tablesAB && x.to == infos.nameB && x.from == infos.nameA; 
+		});
+		
+		if(test.length > 0) already = true;
+		
+		if(!already){
+		if(associationMode=="oneToOne"){
+			for(var i = linksByName.length-1; i >=0 ;i--){
+				if(linksByName[i].tables == tablesAB && linksByName[i].to == infos.nameB){
+					linksByName.splice(i,1);
+				}
+			}
+			for(var i = linksByName.length-1; i >=0 ;i--){
+				if(linksByName[i].tables == tablesAB && linksByName[i].from == infos.nameA){
+					linksByName.splice(i,1);
+				}
+			}
+		}
+		
+		linksByName.push({"tables":tablesAB,"from":infos.nameA,"to":infos.nameB});
+		
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "addLink"
+		});
+		}
+		draw();
+
+
+	}
+
+	var eraseLinkA = function (nameA) {
+		var tablesAB = chosenListA+"|"+chosenListB;
+		
+		for(var i = linksByName.length-1; i >=0 ;i--){
+			if(linksByName[i].tables == tablesAB && linksByName[i].from == nameA){
+				linksByName.splice(i,1);
+			}
+		}
+		draw();
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "removeLink"
+		});
+	}
+
+	var eraseLinkB = function (nameB) {
+		var tablesAB = chosenListA+"|"+chosenListB;
+		
+		for(var i = linksByName.length-1; i >=0 ;i--){
+			if(linksByName[i].tables == tablesAB && linksByName[i].to == nameB){
+				linksByName.splice(i,1);
+			}
+		}
+		draw();
+		$("body").trigger({
+		    type: "fieldLinkerUpdate",
+		    what: "removeLink"
+		});
+	}
+	
+	var readUserPreferences = function(){
+		if(data.options.className){
+			className = data.options.className;
+		}
+
+		if(data.options.lineStyle){
+			if(data.options.lineStyle=="square-ends")
+				lineStyle = "square-ends";
+		}		
+		
+		if(data.options.lineColor){
+			lineColor = data.options.lineColor;
+		}
+		
+		if(data.options.handleColor){
+			handleColor = data.options.handleColor.split(",");
+		}
+		
+		if(data.options.associationMode){
+			associationMode = data.options.associationMode;
+		}
+
+		if (data.options.canvasTopOffset) {
+			canvasTopOffset = data.options.canvasTopOffset;
+		}
+	}
+	
+	var fillChosenLists = function(){
+		listNames = [];
+		listA = [];
+		listB = [];
+		if(chosenListA == "" || chosenListB == ""){
+			chosenListA = data.Lists[0].name;
+			chosenListB = data.Lists[1].name;
+		}
+		data.Lists.forEach(function(x){
+			listNames.push(x.name);
+			if(x.name == chosenListA){
+				x.list.forEach(function(y){
+					listA.push(y);
+				});
+			}
+			if(x.name == chosenListB){
+				x.list.forEach(function(y){
+					listB.push(y);
+				});
+			}
+		});
+	}
+	
+	var makeDropDownForLists = function(){
+		dropDownForLists = $("<select></select>");
+		dropDownForLists
+			.css("width","100%");
+
+		listNames.forEach(function(x){
+			var $option = $("<option></option>")
+			$option
+				.val(x)
+				.text(x)
+				.appendTo(dropDownForLists);
+		});
+		
+	}
+	
+	var drawColumnsAtLoadTime = function(){
+		
+		$(factory).html("");
+				
+		var $main = $("<div></div>");
+		$main
+			.appendTo($(factory))
+			.addClass("FL-main "+className)
+			.css({"position":"relative","width":"100%","text-align":"left"});
+		
+		$leftDiv =  $("<div></div>");
+		$leftDiv
+			.appendTo($main)
+			.addClass("FL-left")
+			.css({ "float": "left", "width": "40%", "display": "inline-block", "text-align": "left", "white-space": "nowrap" })
+			.append(dropDownForLists.clone());
+			
+		$leftDiv.find("select")
+			.attr("id","select1")
+			.val(chosenListA)
+			.on("change",function(){
+				chosenListA = $(this).val();
+				fillChosenLists();
+			})
+	
+		$midDiv =  $("<div></div>");
+		$midDiv
+			.appendTo($main)
+			.addClass("FL-mid")
+			.css({ "display": "inline-block", "width": "20%" });
+			
+		$rightDiv =  $("<div></div>");
+		$rightDiv
+			.appendTo($main)
+			.addClass("FL-right")
+			.css({"float":"right","width":"40%","display":"inline-block","text-align":"left","white-space": "nowrap"})
+			.append(dropDownForLists.clone());
+			
+			$rightDiv.find("select")
+				.attr("id","select2")
+				.val(chosenListB)
+				.on("change",function(){
+					chosenListB = $(this).val();
+					fillChosenLists();
+				});
+			
+		var $ul =  $("<ul></ul>");
+		$ul
+		.appendTo($leftDiv)
+		.css({"text-align":"left","list-style":"none"})
+		
+		if(data.options.buttonErase){
+			var $btn =  $("<button></button>");
+			$btn 
+				.appendTo($(factory).find(".FL-main"))
+				.attr("type","button")
+				.addClass("btn btn-danger  btn-sm eraseLink")
+				.html(data.options.buttonErase);
+		}
+	}
+var drawColumnsContentA = function(){
+		var $ulA =	$(".FL-left ul");
+		if($ulA.length == 1){
+			$ulA.empty();
+		}else{
+
+			$ulA =  $("<ul></ul>");
+		}
+		$ulA 
+			.appendTo($leftDiv)
+			.attr("data-col",chosenListA)
+			.css({"text-align":"left","list-style":"none"});
+			
+		listA.forEach(function(x,i){
+			var $li =  $("<li></li>");
+			$li
+				.appendTo($ulA)
+				.attr("data-offset",i)
+				.attr("data-name",x)
+				.css({"width":"100%","position": "relative"});
+				
+			var $div =$("<div></div>");	
+			$div
+				.appendTo($li)
+				.attr("ondrop","LM_drop(event)")
+				.attr("ondragover","LM_allowDrop(event)")
+				.attr("ondragstart","LM_drag(event)")
+				.attr("draggable","true")
+				.css({"width":"80%"})
+				.text(x);
+				
+			
+			var $eraseIcon = $("<i></i>");
+			$eraseIcon 
+				.appendTo($li)
+				.addClass("fa fa-undo unlink")
+				.attr("draggable","false")
+				.css({"right":"28px","color":"#aaa","position": "absolute","top":"50%","transform": "translateY(-50%)"});
+			var $pullIcon = $("<i></i>");
+			$pullIcon 
+				.appendTo($li)
+				.addClass("fa fa-arrows-alt link")
+				.attr("draggable","false")
+				.css({"right":"8px","color":"#aaa","position": "absolute","top":"50%","transform": "translateY(-50%)"});
+		});
+		
+	// Computing the vertical offset of the middle of each cell.
+	ListHeights1 = [];
+	$(factory).find(".FL-main .FL-left li").each(function(i){
+		var position = $(this).position();
+		var hInner = $(this).height();
+		var hOuter = $(this).outerHeight();
+		var delta = Math.floor(0.5 + (hOuter - hInner)/2);
+		var midInner = Math.floor(0.5 + hInner/2);
+		var midHeight = position.top + midInner - delta -1;
+		ListHeights1.push(midHeight);
+		if (i == 0) {
+			canvasTopMarg = position.top;
+		}
+	});
+	
+
+		
+			// On mousedown in left List : 
+	$(factory).find(".FL-main .FL-left li").off("mousedown").on("mousedown",function(e){
+		// we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
+		if (isDisabled) return;
+		move = {};
+		move.offsetA = $(this).data("offset");
+		move.nameA = $(this).data("name");
+		move.offsetB = -1;
+		move.nameB = -1;
+	});
+	
+	$(factory).find(".FL-main .FL-left li .unlink").off("click").on("click", function (e) {
+		if (isDisabled) return;
+		eraseLinkA($(this).parent().data("name"));	
+		draw();
+	});
+	
+	$(factory).find(".FL-main .FL-left li").off("mouseup").on("mouseup", function (e) {
+		if (isDisabled) return;
+		// We do a mouse up on le teft side : the drag is canceled
+		move=null;
+	});
+
+
+	}
+
+	var drawColumnsContentB = function(){
+		var $ulB =	$(".FL-right ul");
+		
+		if($ulB.length == 1){
+			$ulB.empty();
+		}else{
+			$ulB =  $("<ul></ul>");
+		}
+		
+		$ulB
+			.appendTo($rightDiv)
+			.attr("data-col",chosenListB)
+			.css({"text-align":"left","list-style":"none"})
+			
+
+		listB.forEach(function(x,i){			
+			var $li =  $("<li></li>");
+			$li
+				.appendTo($ulB)
+				.attr("data-offset",i)
+				.attr("data-name",x)
+				.attr("draggable","true");
+				
+			var $div =$("<div></div>");	
+			$div
+				.appendTo($li)
+				.attr("ondrop","LM_drop(event)")
+				.attr("ondragover","LM_allowDrop(event)")
+				.attr("ondragstart","LM_drag(event)")
+				.attr("draggable","true")
+				.css({"width":"80%"})
+				.text(x);
+				
+		});
+		
+		// Computing the vertical offset of the middle of each cell.
+		ListHeights2 = [];
+	$(factory).find(".FL-main .FL-right li").each(function(i){
+		var position = $(this).position();
+		var hInner = $(this).height();
+		var hOuter = $(this).outerHeight();
+		var delta = Math.floor(0.5 + (hOuter - hInner)/2);
+		var midInner = Math.floor(0.5 + hInner/2);
+		var midHeight = position.top + midInner - delta;
+		ListHeights2.push(midHeight);
+	});
+		
+	// Mouse up on the right side 
+	$(factory).find(".FL-main .FL-right li").off("mouseup").on("mouseup", function (e) {
+		if (isDisabled) return;
+		if(move != null){ // no drag 
+			if(associationMode=="oneToOne"){
+				eraseLinkB($(this).data("name")); // we erase an existing link if any
+			}
+			move.offsetB = $(this).data("offset");
+			move.nameB = $(this).data("name");
+			var infos =  JSON.parse(JSON.stringify(move));
+			move = null;
+			makeLink(infos);
+			}
+	});
+	
+		$(factory).find(".FL-main .FL-right li").off("dblclick").on("dblclick", function (e) {
+		if (isDisabled) return;
+			eraseLinkB($(this).data("name")); // we erase an existing link if any
+			draw();
+	});
+	
+	// mousemove over a right cell
+	$(factory).find(".FL-main .FL-right li").off("mousemove").on("mousemove",function(e){
+		if (isDisabled) return;
+		if(move != null){ // drag occuring
+
+			var _from = move.offsetA;
+			var _To = $(this).data("offset");
+			 
+			var Ax = 0;
+			var Ay = ListHeights1[_from];
+			 
+			var Bx = canvasWidth;
+			var By = ListHeights2[_To];
+			 
+			draw();
+			canvasCtx.beginPath(); 
+			var color= handleColor[_from%handleColor.length];
+			canvasCtx.fillStyle = 'white';
+			canvasCtx.strokeStyle = color;
+			
+			canvasCtx.moveTo(Ax, Ay);
+			canvasCtx.lineTo(Bx, By);
+			canvasCtx.stroke();
+		}
+	});
+	
+	}
+
+var createCanvas = function(){
+	
+   canvasId = "cnv_"+Date.now();
+		
+		var w = $midDiv.width();	
+		var h2 = $rightDiv.height();	
+		var h1 = $leftDiv.height();	
+		var h = h1 >= h2 ? h1 : h2;
+		$canvas =  $("<canvas></canvas>");
+		
+		$canvas
+			.appendTo($midDiv)
+			.attr("id",canvasId)
+			.css({"width": w+"px","height":h+"px"});
+		
+		canvasWidth = w;
+		canvasHeight = h;		
+		canvasPtr= document.getElementById(canvasId);
+		canvasPtr.width = canvasWidth;
+		canvasPtr.height = canvasHeight;
+		canvasCtx = canvasPtr.getContext("2d");
+
+		canvasTopMargin = canvasTopOffset;
+		
+
+	   $canvas
+				.css("margin-top", canvasTopMarg+"px");
+	
+}
+
+var setListeners = function(){
+	
+	// Listeners :
+	if (data.options.buttonErase) {
+		$(factory).find(".FL-main .eraseLink").on("click", function (e) {
+			if (isDisabled) return;
+			linksByName.length = 0;
+			draw();
+			$("body").trigger({
+				type: "fieldLinkerUpdate",
+				what: "removeLink"
+			});
+		});
+	}
+	
+
+	// mousemove over the canvas
+	$(factory).find("canvas").on("mousemove", function (e) {
+		if (isDisabled) return;
+		if(move != null){
+			canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+			// we redraw all the existing links
+			draw();
+			canvasCtx.beginPath(); 
+			// we draw the new would-be link
+			var _from = move.offsetA;
+			var color= handleColor[_from%handleColor.length];
+			canvasCtx.fillStyle = 'white';
+			canvasCtx.strokeStyle = color;
+			
+			var Ax = 0;
+			var Ay = ListHeights1[_from];
+			// mouse position relative to the canvas
+			var Bx = e.offsetX;
+			var By = e.offsetY;
+			
+			canvasCtx.moveTo(Ax, Ay);
+			canvasCtx.lineTo(Bx, By);
+			canvasCtx.stroke();
+		}
+	});
+	
+	$(factory).find(".FL-main").on("mouseup", function (e) {
+		if (isDisabled) return;
+		if(move!=null){
+			move = null;
+			draw();
+		}
+	});
+	
+	$(".FL-left select").on("change", function (e) {
+		if (isDisabled) return;
+		chosenListA = $(this).val();
+		$(".FL-right select option").each(function(){
+			$(this).attr("disabled",$(this).val()==chosenListA);
+		});
+		drawColumnsContentA();
+		draw();
+	});
+	
+	$(".FL-right select").on("change", function (e) {
+		if (isDisabled) return;
+		chosenListB = $(this).val();
+		$(".FL-left select option").each(function(){
+			$(this).attr("disabled",$(this).val()==chosenListB);
+		});
+		drawColumnsContentB();
+		draw();
+	});
+}
+
+	$.fn.fieldsLinker = function(action,input) {
+		factory = this;
+		
+	    if (action == "init") {
+			
+			$("body").on("LM_Message_Redraw",function(){
+				move=null;
+				listA = [];
+				listB = [];
+				LM_Factory_Lists.Lists.forEach(function(x){
+					if(x.name == chosenListA){
+						listA = x.list;
+					}
+					if(x.name == chosenListB){
+						listB = x.list;
+					}
+				});
+				drawColumnsContentA();
+				drawColumnsContentB();
+				draw();
+			});
+			
+
+	        if(!input){
+	            onError = true;
+	            console.log(errMsg + "no input parameter provided (param 2)" );
+				return;
+	        }
+	        
+	        data = JSON.parse(JSON.stringify(input));
+			
+			LM_Factory_Lists = data;
+			
+			if(!data.Lists || data.Lists.length < 2){
+				onError = true;
+	            console.log(errMsg + "provide at least 2 lists" );
+				return;
+			}
+			
+			listsNr = data.Lists.length;
+			
+			readUserPreferences();
+			
+			fillChosenLists();
+			
+			makeDropDownForLists();
+
+			drawColumnsAtLoadTime();
+			drawColumnsContentA();
+			drawColumnsContentB();
+			createCanvas();
+			
+
+			setListeners();
+			
+	        $(".FL-left select")
+				.trigger("change")
+				.attr("disabled","true");
+			
+	        $(".FL-right select")
+				.trigger("change")
+				.attr("disabled","true");
+			
+	            if(data.existingLinks){
+					linksByName = data.existingLinks.links;
+	            }	
+				
+	            $(window).resize(function() {
+	                canvasWidth = $(factory).find(".FL-main .FL-mid").width();
+	                canvasPtr.width = canvasWidth;
+	                $("#"+canvasId).css("width",canvasWidth+"px");
+	                draw();
+	            });
+	            draw();			
+	   
+	        return (factory);
+
+	    }else if(action == "eraseLinks"){
+	        linksByName.length = 0;
+	        draw();
+		
+		}else if( action === "getLinks") {
+
+				return {
+					  "links" : linksByName
+				  };  
+	
+		}else if( action === "changeParameters" ) {
+			if(!onError){
+				if(input){
+					var options = JSON.parse(JSON.stringify(input));
+					
+					if(options.className){
+						className = options.className;
+					}
+					
+					if(options.lineStyle){
+						lineStyle =options.lineStyle;
+						draw();
+					}		
+					
+					if(options.lineColor){
+						lineColor = options.lineColor;
+					}
+					
+					if(options.handleColor){
+						handleColor = options.handleColor;
+					}
+					if(options.associationMode){
+						let unicityTokenA = "";
+						let unicityTokenB = "";
+						let formerAssociation = associationMode;
+						associationMode = options.associationMode;
+						if(associationMode == "oneToOne" && formerAssociation == "manyToMany"){
+							let unicityDict= {};
+							for(var i = linksByName.length-1; i >=0 ;i--){
+								unicityTokenA = linksByName[i].tables + "_A_" + linksByName[i]["from"];
+								unicityTokenB = linksByName[i].tables + "_B_" + linksByName[i]["to"];
+								let doDelete = false;
+								if(!unicityDict[unicityTokenA]){
+									unicityDict[unicityTokenA] = true;
+								}else{
+									doDelete = true;
+								}
+								if(!unicityDict[unicityTokenB]){
+									unicityDict[unicityTokenB] = true;
+								}else{
+									doDelete = true;
+								}
+								if(doDelete){
+									linksByName.splice(i,1);
+								}
+							}
+						}
+					}
+				}
+			draw();
+			}
+		} else if (action == "disable") {
+		    isDisabled = true;
+		    $(factory)
                 .find(".eraseLink")
                 .prop("disabled", isDisabled);
 
-            $(that)
+		    $(factory)
                 .find("li")
                 .addClass("inactive");
 
-            globalAlpha = 0.5;
+		    $(factory)
+                .find("select")
+                .prop("disabled", isDisabled);
+				
+		    globalAlpha = 0.5;
 
-            draw();
+		    draw();
 
-            return (that);
-        }
-        else if (action == "enable") {
-            var that = this;
-            isDisabled = false;
-            $(that)
+		    return (that);
+		}
+		else if (action == "enable") {
+		    
+		    isDisabled = false;
+		    $(factory)
                 .find(".eraseLink")
                 .prop("disabled", isDisabled);
 
-            $(that)
+		    $(factory)
                 .find("li")
                 .removeClass("inactive");
 
-            globalAlpha = 1;
+		    $(factory)
+                .find("select")
+                .prop("disabled", isDisabled);
+				
+		    globalAlpha = 1;
 
-            draw();
+		    draw();
 
-            return (that);
-        } else {
-            onError = true;
-            console.log(errMsg + "no action parameter provided (param 1)");
-        }
+		    return (factory);
+		} else {
+			onError = true;
+			console.log(errMsg + "no action parameter provided (param 1)" );
+		} 
+	}
+}( jQuery ));
+
+
+function LM_allowDrop (ev) {
+  ev.preventDefault();
+}
+
+function LM_drag(ev) {
+
+	let $target = $(ev.target);
+	let data = {};
+	data.name = $target.parent().attr("data-name");
+	data.col = $target.parent().parent().attr("data-col");
+	data.offset = $target.parent().attr("data-offset");
+
+	ev.dataTransfer.setData("text/plain", JSON.stringify({"data":data}));
+}
+
+function LM_drop (ev) {
+  ev.preventDefault();
+  let src = JSON.parse(ev.dataTransfer.getData("text"));
+  if(src){
+	  src = src.data;
+  }
+  let $target = $(ev.target);
+  	let dest = {};
+	dest.name = $target.parent().attr("data-name");
+	dest.col = $target.parent().parent().attr("data-col");
+	dest.offset = $target.parent().attr("data-offset");
+
+  
+
+if(src.col == dest.col && src.offset != dest.offset && src.name != dest.name){
+	  
+		FL_Factory_Lists.Lists.forEach(function(x){
+			if(x.name == src.col){
+				let indexA = x.list.indexOf(src.name);
+				let indexB = x.list.indexOf(dest.name);
+				if(indexA != -1 && indexB != -1){
+					let temp =  x.list[indexA];
+					x.list[indexA] = x.list[indexB];
+					x.list[indexB] = temp;
+				}
+			}
+		});
+		
+		$("body").trigger("LM_Message_Redraw")
+
+		
     }
-}(jQuery));
-
-
+}
