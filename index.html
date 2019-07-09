@@ -111,18 +111,16 @@
   
 	  
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
-	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.72
+	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.80
 	  <p>Allows to link elements of list A to elements of list B and returns the links in a js object</p>
 	  <ul class="presentation">
-	  <li>You can choose beetween an input/output with positions or names</li>
-	  <li>Colours can be re-defined and links come in 3 flavours</li>
+	  <li>The elements of a list are sortable by drag and drop for a better lisibility</li>
+	  <li>Colours can be re-defined and links come in 2 flavours</li>
 		<ol>
 			<li>Straight lines</li>
 			<li>Lines with squares at the ends</li>
-			<li>Same as 2 but with over effet more visible (dotted squares)/li>
 		</ol>
 	  <li>You may input somme links from a previous session</li>
-	  <li>Auto-detect feature helps you find part of the links (optional)</li>
 	  <li>Mandatory fields (optional array)</li>
 	  <li>Works in Chrome, Chromium, Opera, Firefox and IE (9+)</li>
 	  <li>Result in an object with error true/false plus an array of links</li>
@@ -134,9 +132,6 @@
 				<div class="btn-group btn-group-toggle radio-zone lineStyle" data-toggle="radio">
 					<label class="active">
 					<input type="radio" name="lineStyle" id="lineStyle1" value="square-ends" autocomplete="off" checked> Square on ends
-					</label>&nbsp;
-					<label class="">
-					<input type="radio" name="lineStyle" id="lineStyle3" value="square-ends-dotted" autocomplete="off"> Square dotted
 					</label>&nbsp;
 					<label class="">
 					<input type="radio" name="lineStyle" id="lineStyle2" value="straight" autocomplete="off"> Straight line
@@ -188,9 +183,6 @@
 					"associationMode":"manyToMany", // oneToOne,manyToMany
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
-					"autoDetect":"off",
-					"effectHover": "on",
-                    "effectHoverBorderWidth" : 2
 				},
 					"Lists":[
 						{
@@ -212,8 +204,9 @@
 							"list" : [
 								"Company",
 								"jobTitle",
-								"adress 1",	
-								"adress 2",	
+								"adress",	
+								"adress",
+								"adress",								
 								"first_name",
 								"last_name",
 								"email_adress",
@@ -224,9 +217,9 @@
 								"email_adress"
 							]
 						}
-						]
+						],
 
-					//"existingLinks" : [{"from":"firstName","to":"first_name"}]
+					"existingLinks" : [{"from":"lastName","to":"last_name"},{"from":"firstName","to":"first_name"},{"from":"role","to":"jobTitle"}]
 			};
 			
 		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
@@ -252,7 +245,5 @@
 			$(this).parent().addClass("active");
 		});
 
-		
-		
 	 </script>  
 </html>
