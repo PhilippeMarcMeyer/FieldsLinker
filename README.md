@@ -13,13 +13,15 @@ You can link on a one to one basis or on a one to many basis. Fields can be decl
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
 
--v 0.72 : New lineStyle : square-ends-dotted : white dots at the beginings and ends of lines on hover-
+v 0.80 : I've been cleaning code in order to get something much simpler (nearly the same code than LinksMaker) it allowed me to implement drag and drop to reorder the items in the lists, which is convenient expecially if you've got long lists.
+options dropped in this version : autoDetect and byName : no more autodetect and the links are given back by name only not by order.
+the link over effect has also been dropped. Important : oneToMany:"on|off" becomes associationMode: "oneToOne|manyToMany"
+
+v 0.72 : [Cancelled] New lineStyle : square-ends-dotted : white dots at the beginings and ends of lines on hover
 
 v 0.60 : 
 Mandatory fields show a tooltip (mandatoryErrorMessage)
 disable/enable : disable/enable everything, the global opacity is set to 0.5
-canvasTopOffset : integer to tweek the vertical position of the canvas where the links are drawn 
-sometimes useless. example : -4 => set the canvas zone 4px closer to the top.
 
 v 0.45 : Mandatory fields. the css is now in his own file.
 
@@ -57,7 +59,7 @@ https://philippemarcmeyer.github.io/FieldsLinker/index.html
 					"byName" : true,
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
-					"autoDetect":"on"
+					
 				},
 				"listA":
 					{
