@@ -86,6 +86,58 @@
 	.fieldLinkerSave {
 		display:inline-block;
 	}
+	
+	
+input[type=radio] {
+	font-size: 11px;
+	cursor: pointer;
+}
+
+	input[type=radio]:before {
+		background: white;
+		border: 2px solid #337ab7;
+		border-radius: 50%;
+		margin-top: -2px;
+		margin-right: 6px;
+		display: inline-block;
+		vertical-align: middle;
+		content: '';
+		width: 14px;
+		height: 14px;
+	}
+
+	input[type=radio]:checked:before {
+		background: #337ab7;
+		border-color: #337ab7;
+		box-shadow: inset 0px 0px 0px 2px #fff;
+	}
+	.choices{
+		display:inline-block;
+		margin-right:40px;
+	}
+	
+	.choices label{
+		font-weight:normal;
+		margin-left:4px;
+		margin-right:4px;
+		vertical-align:8%;
+	}
+	
+	.nice-group{
+		width:680px;
+		line-height: 16px;
+		padding:10px;
+		border:1px solid #ccc;
+		background-color:#fff
+		border-radius:5px;
+	}
+	.nice-group legend {
+		color: #337ab7;
+		width:120px;
+		font-size:14px !important;
+		border-bottom:none;
+		
+	}
 	 
 	</style>
   </head>
@@ -128,26 +180,24 @@
 	   </ul>
 	    <hr/>	
 		<div class="row" >
-			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<div class="btn-group btn-group-toggle radio-zone lineStyle" data-toggle="radio">
-					<label class="active">
-					<input type="radio" name="lineStyle" id="lineStyle1" value="square-ends" autocomplete="off" checked> Square on ends
-					</label>&nbsp;
-					<label class="">
-					<input type="radio" name="lineStyle" id="lineStyle2" value="straight" autocomplete="off"> Straight line
-					</label>
-				</div>	
+			<div>
+   <fieldset class="nice-group">
+		   <legend>Change options :</legend>
+				  <div class="choices">
+					  <input name="associationMode" type="radio" value="oneToOne" /><label>oneToOne</label>
+					  <input name="associationMode" type="radio" value="manyToMany" checked="checked" /><label>manyToMany</label>
+				 </div>
+				
+				 <div class="choices">
+					  <input name="enable" type="radio" value="enable" checked="checked"  /><label>Enable</label>
+					  <input name="enable" type="radio" value="disable" /><label>Disable</label>
+				 </div>
+				 <div class="choices">
+					  <input name="lineStyle" type="radio" value="straight"  /><label>straight</label>
+					  <input name="lineStyle" type="radio" value="square-ends" checked="checked" /><label>square-ends</label>
+				 </div>
+		   </fieldset>
 			</div>	
-			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<div class="btn-group btn-group-toggle radio-zone oneOrMany" data-toggle="radio">
-					<label class="active">
-					<input type="radio" name="oneToMany" id="oneToManyOff" value="off" autocomplete="off" checked> One to One
-					</label>&nbsp;
-					<label class="">
-					<input type="radio" name="oneToMany" id="oneToManyOn" value="on" autocomplete="off"> One to Many
-					</label>
-				</div>	
-			</div>				
 	  	</div>	  
 	  </div>
 	     <hr/>	  
@@ -231,18 +281,21 @@
 			
 		});
  
-		$(".lineStyle input[type='radio'").on("click",function(){
-			var lineStyle = $("input[name='lineStyle']:checked").val();
-			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":lineStyle});
-			$(".lineStyle label").removeClass("active");
-			$(this).parent().addClass("active");
+ 
+		 $("input[name='associationMode']").on("click", function () {
+		 let choice = $(this).val();
+			fieldLinks.fieldsLinker("changeParameters",{"associationMode":choice});
 		});
 		
-		$(".oneOrMany input[type='radio'").on("click",function(){
-			fieldLinks.fieldsLinker("changeParameters",{"oneToMany":this.value});
-
-			$(".oneOrMany label").removeClass("active");
-			$(this).parent().addClass("active");
+		$("input[name='enable']").on("click", function () {
+		 let choice = $(this).val();
+		 
+			fieldLinks.fieldsLinker(choice);
+		});		
+		
+		$("input[name='lineStyle']").on("click", function () {
+		 let choice = $(this).val();
+			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":choice});
 		});
 
 	 </script>  
