@@ -318,86 +318,12 @@ var drawColumnsContentA = function(){
 		move.offsetB = -1;
 		move.nameB = -1;
 	});
-
-	$(factory).find(".link").off("touchstart").on("touchstart",function(e){
-		if (isDisabled) return;
-		move = {};
-		move.offsetA = $(this).parent().data("offset");
-		move.nameA = $(this).parent().data("name");
-		move.offsetB = -1;
-		move.nameB = -1;
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.touches[0];
-				if(move != null){
-					var mouseEvent = new MouseEvent("mousedown", {
-						clientX: touch.clientX,
-						clientY: touch.clientY
-					});
-					drawImmediate(mouseEvent);
-				}
-
-			}
-
-	});
-	
-	
-	$(factory).find(".link").off("touchmove").on("touchmove",function(e){
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.touches[0];
-				var mouseEvent = new MouseEvent("mousemove", {
-					clientX: touch.clientX,
-					clientY: touch.clientY
-				});
-				
-				if(move != null){
-					drawImmediate(mouseEvent);
-				}
-
-			}
-	});
-	$(factory).find(".link").off("touchend").on("touchend",function(e){
-			if (isDisabled) return;
-
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.changedTouches[0];
-				var mousePosition = {x:touch.clientX,y:touch.clientY};
-				if(move != null){
-					let found = false;
-					$(factory).find(".FL-main .FL-right li").each(function(i){
-						if(!found){
-						var rect = this.getBoundingClientRect();
-						//left, top, right, bottom, width, height
-						if(mousePosition.x >= rect.left && mousePosition.x <= rect.right && mousePosition.y >= rect.top && mousePosition.y <= rect.bottom){ 
-							if(associationMode=="oneToOne"){
-								eraseLinkB($(this).data("name")); // we erase an existing link if any
-							}
-							move.offsetB = $(this).data("offset");
-							move.nameB = $(this).data("name");
-							var infos =  JSON.parse(JSON.stringify(move));
-							move = null;
-							makeLink(infos);
-							found = true;
-						}
-						}
-					});	
-					if(!found){
-						draw();
-					}
-				}
-
-			}
-
-	});
-	
 	$(factory).find(".FL-main .FL-left li .unlink").off("click").on("click", function (e) {
 		if (isDisabled) return;
 		eraseLinkA($(this).parent().data("name"));
 		draw();
 	});
-	$(factory).find(".FL-main .FL-left li").off("mouseup").on("mouseup" , function (e) {
+	$(factory).find(".FL-main .FL-left li").off("mouseup").on("mouseup", function (e) {
 		if (isDisabled) return;
 		// We do a mouse up on le teft side : the drag is canceled
 		move=null;
@@ -511,41 +437,7 @@ var createCanvas = function(){
 	   $canvas
 				.css("margin-top", canvasTopMarg+"px");
 }
-
-var getTouchPos=function( e) {
-  var rect = canvasPtr.getBoundingClientRect();
-  return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-}
-
-var drawImmediate=function(e){
-	canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-	// we redraw all the existing links
-	draw();
-	canvasCtx.beginPath();
-	// we draw the new would-be link
-	var _from = move.offsetA;
-	var color= handleColor[_from%handleColor.length];
-	canvasCtx.fillStyle = 'white';
-	canvasCtx.strokeStyle = color;
-	var Ax = 0;
-	var Ay = ListHeights1[_from];
-	// mouse position relative to the canvas
-	//var Bx = e.offsetX;
-	//var By = e.offsetY;
-	var relativePosition = getTouchPos(e);
-	var Bx = relativePosition.x;
-	var By = relativePosition.y;
-	canvasCtx.moveTo(Ax, Ay);
-	canvasCtx.lineTo(Bx, By);
-	canvasCtx.stroke();
-			
-}
 var setListeners = function(){
-	// Mobiles 
-
 	// Listeners :
 	if (data.options.buttonErase) {
 		$(factory).find(".FL-main .eraseLink").on("click", function (e) {
@@ -558,13 +450,27 @@ var setListeners = function(){
 			});
 		});
 	}
-	
-	
 	// mousemove over the canvas
 	$(factory).find("canvas").on("mousemove", function (e) {
 		if (isDisabled) return;
 		if(move != null){
-			drawImmediate(e);
+			canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+			// we redraw all the existing links
+			draw();
+			canvasCtx.beginPath();
+			// we draw the new would-be link
+			var _from = move.offsetA;
+			var color= handleColor[_from%handleColor.length];
+			canvasCtx.fillStyle = 'white';
+			canvasCtx.strokeStyle = color;
+			var Ax = 0;
+			var Ay = ListHeights1[_from];
+			// mouse position relative to the canvas
+			var Bx = e.offsetX;
+			var By = e.offsetY;
+			canvasCtx.moveTo(Ax, Ay);
+			canvasCtx.lineTo(Bx, By);
+			canvasCtx.stroke();
 		}
 	});
 	$(factory).find(".FL-main").on("mouseup", function (e) {
