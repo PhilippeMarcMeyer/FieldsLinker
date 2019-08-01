@@ -9,7 +9,7 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
-### New in v0.80 : items in lists can now be sorted by drag and drop for a better lisibility !
+### New in v0.85 : Mobile friendly Beta : (no sorting)
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
 
