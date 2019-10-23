@@ -9,9 +9,11 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
-### New in v0.85 : Mobile friendly Beta : (no sorting)
+### New in v0.86 : Works also without bootstrap
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
+
+v 0.86 : Modifications if Bootstrap is not available : tooltip are basic html titles and the links are horizontally centered
 
 v 0.85 : Mobile friendly (requested by a user)
 

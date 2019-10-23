@@ -1,8 +1,11 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.8
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.86
+   v 0.86 : Modifications if Bootstrap is not available : tooltip are basic html titles and the links are horizontally centered
 */
 let FL_Factory_Lists = null;
+
 (function ( $ ) {
+	var bootstrap_enabled = (typeof $().modal == 'function');
 	const errMsg  = "fieldsLinker error : "
 	var factory;
 	var data = {};
@@ -436,7 +439,8 @@ var drawColumnsContentA = function(){
 					$li
 						.attr("data-placement", "top")
 						.attr("title", mandatoryErrorMessage);
-					$li.tooltip();
+						if(bootstrap_enabled)
+							$li.tooltip();
 				}
 		});
 		// Computing the vertical offset of the middle of each cell.
@@ -508,8 +512,13 @@ var createCanvas = function(){
 		canvasPtr.height = canvasHeight;
 		canvasCtx = canvasPtr.getContext("2d");
 		canvasTopMargin = canvasTopOffset;
-	   $canvas
+		if(bootstrap_enabled){
+			$canvas
 				.css("margin-top", canvasTopMarg+"px");
+		}else{
+			$canvas
+				.css("margin-top", (canvasTopMarg-10)+"px");
+		}
 }
 
 var getTouchPos=function( e) {
