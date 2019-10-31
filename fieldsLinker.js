@@ -45,6 +45,7 @@ let FL_Factory_Lists = null;
 	var displayMode = "original";
 	var linksOnColumn=0;
 	var hideLink= true;
+
 	
 	var draw = function () {
 		var tablesAB = chosenListA+"|"+chosenListB; // existingLinks
@@ -58,8 +59,24 @@ let FL_Factory_Lists = null;
 			return x.tables == tablesAB;
 		});
 		links.forEach(function(item,i){
-			var positionA = listA.indexOf(item.from);
-			var positionB = listB.indexOf(item.to);
+				var positionA = -1
+				var positionB = -1
+			if(displayMode == "original"){
+					positionA = listA.indexOf(item.from);
+					positionB = listB.indexOf(item.to);
+			}else if(displayMode == "original"){
+				listA.forEach(function(x,j){
+					if(x[listA.keyName] == item.from){
+						positionA = i;
+					}
+				});
+				listB.forEach(function(x,j){
+					if(x[listB.keyName] == item.to){
+						positionB = i;
+					}
+				});
+
+			}
 			if(positionB == -1 || positionA == -1){
 				console.log("error link names unknown");
 				return;
@@ -292,11 +309,10 @@ var drawColumnsContentA = function(){
 			let item = x;
 			let id = x;
 			if(displayMode == "alternateView"){
-				let count = -1;
+				item = "";
 				let sep = "";
 				for(key in x){
-					count++;
-					if(count == linksOnColumn){
+					if(key == listA.keyName){
 						id = x[key];
 					}else{
 						item += sep+x[key];
@@ -456,11 +472,10 @@ var drawColumnsContentA = function(){
 			let item = x;
 			let id = x;
 			if(displayMode == "alternateView"){
-				let count = -1;
+				item = "";
 				let sep = "";
 				for(key in x){
-					count++;
-					if(count == linksOnColumn){
+					if(key == listA.keyName){
 						id = x[key];
 					}else{
 						item += sep+x[key];
@@ -698,20 +713,25 @@ var setListeners = function(){
 	            console.log(errMsg + "provide at least 2 lists" );
 				return;
 			}
+
+			readUserPreferences();
+			
 			listsNr = data.Lists.length;
-			for(let i = 0 ; i < listsNr;i++){
-				let dict = {};
-				for(let j = 0 ; j < data.Lists[i].list.length;j++){
-					let val = data.Lists[i].list[j];
-					if(!dict[val]){
-						dict[val] = 1;
-					}else{
-						dict[val]+=1;
-						data.Lists[i].list[j] += "("+dict[val]+")";
+			
+			if(displayMode == "original"){
+				for(let i = 0 ; i < listsNr;i++){
+					let dict = {};
+					for(let j = 0 ; j < data.Lists[i].list.length;j++){
+						let val = data.Lists[i].list[j];
+						if(!dict[val]){
+							dict[val] = 1;
+						}else{
+							dict[val]+=1;
+							data.Lists[i].list[j] += "("+dict[val]+")";
+						}
 					}
 				}
 			}
-			readUserPreferences();
 			fillChosenLists();
 			makeDropDownForLists();
 			drawColumnsAtLoadTime();

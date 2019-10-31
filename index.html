@@ -198,18 +198,18 @@ input[type=radio] {
 				 </div>
 				 <br/>
 				  <div class="choices">
-					  <input name="displayMode" type="radio" value="original" checked="checked" /><label>original</label>
-					  <input name="displayMode" type="radio" value="alternateView" /><label>alternateView</label>
+					  <input name="displayMode" type="radio" value="original" /><label>original</label>
+					  <input name="displayMode" type="radio" value="alternateView"  checked="checked" /><label>alternateView</label>
 				 </div>			 
 		   </fieldset>
 			</div>	
 	  	</div>	  
 	  </div>
 	     <hr/>	  
-	  <div class="bonds" id="original" style="display:block;">
+	  <div class="bonds" id="original" style="display:none;">
 	
 	  </div>
-	  <div class="bonds" id="alternateView" style="display:none;">
+	  <div class="bonds" id="alternateView" style="display:block;">
 	
 	  </div>
 	 <hr/>
@@ -279,14 +279,14 @@ input[type=radio] {
 
 					"existingLinks" : [{"from":"lastName","to":"last_name"},{"from":"firstName","to":"first_name"},{"from":"role","to":"jobTitle"}]
 			};
-			
+			/*
 		  	fieldLinks=$("#original").fieldsLinker("init",input);
 			
 			$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");
 				$("#output").html("output => " + JSON.stringify(results));
 			});
-			
+			*/
 			// ------ alernateView
 				var altInput = {
 			    "localization":{
@@ -302,26 +302,28 @@ input[type=radio] {
 					"Lists":[
 						{
 							"name":"Students",
+							"keyName" : "Id",
 							"list" : [
 							   {"Id":1,"Name":"Scott","Address":"Albama"},
-							   {"Id":2,"Name":"Andrew","Address":"Alaska"},
+							   {"Id":2,"Name":"Andrew","Address":"Alaska"}
 							]
 						},
 						{
 							"name":"Courses",
+							"keyName" : "CourseId",
 							"list" : [
 								{"CourseId":1,"CourseName":"Analytics"},
 								{"CourseId":2,"CourseName":"DataScience"},
 								{"CourseId":3,"CourseName":"JQuery"},
 								{"CourseId":4,"CourseName":"JavaScript"},
-								{"CourseId":5,"CourseName":"MVC"},
-							],
+								{"CourseId":5,"CourseName":"MVC"}
+							]
 						}
 						],
-
+					"existingLinks" : [{"from":1,"to":1},{"from":1,"to":2},{"from":1,"to":4},{"from":2,"to":1}]
 			};
 			
-		  	fieldLinksAlt=$("#alternateView").fieldsLinker("init",altInput);
+		  fieldLinksAlt=$("#alternateView").fieldsLinker("init",altInput);
 		
 		});
 		
