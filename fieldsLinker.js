@@ -42,6 +42,10 @@ let FL_Factory_Lists = null;
 	var isDisabled = false;
 	var globalAlpha = 1;
 	let mandatories = [];
+	var displayMode = "original";
+	var linksOnColumn=0;
+	var hideLink= true;
+	
 	var draw = function () {
 		var tablesAB = chosenListA+"|"+chosenListB; // existingLinks
 		//{"tables":tablesAB,"from":infos.nameA,"to":infos.nameB}
@@ -153,6 +157,20 @@ let FL_Factory_Lists = null;
 		if(data.options.lineColor){
 			lineColor = data.options.lineColor;
 		}
+		if(data.options.displayMode){
+			displayMode = data.options.displayMode;
+			if(displayMode != "alternateView"){
+				displayMode = "original";
+			}
+		}
+		if(displayMode == "alternateView"){
+			if(data.options.linksOnColumn){
+				linksOnColumn = data.options.linksOnColumn;
+			}
+			if(data.options.hideLink){
+				hideLink = data.options.hideLink;
+			}
+		}
 		if(data.options.handleColor){
 			handleColor = data.options.handleColor.split(",");
 		}
@@ -257,6 +275,7 @@ let FL_Factory_Lists = null;
 				.html(data.options.buttonErase);
 		}
 	}
+	
 var drawColumnsContentA = function(){
 		var $ulA =	$(".FL-left ul");
 		if($ulA.length == 1){
@@ -270,10 +289,26 @@ var drawColumnsContentA = function(){
 			.css({"text-align":"left","list-style":"none"});
 		listA.forEach(function(x,i){
 			var $li =  $("<li></li>");
+			let item = x;
+			let id = x;
+			if(displayMode == "alternateView"){
+				let count = -1;
+				let sep = "";
+				for(key in x){
+					count++;
+					if(count == linksOnColumn){
+						id = x[key];
+					}else{
+						item += sep+x[key];
+						sep = " | ";
+					}
+				}
+			}
+
 			$li
 				.appendTo($ulA)
 				.attr("data-offset",i)
-				.attr("data-name",x)
+				.attr("data-name",id)
 				.css({"width":"100%","position": "relative"});
 			var $div =$("<div></div>");
 			$div
@@ -283,7 +318,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(x);
+				.text(item);
 			var $eraseIcon = $("<i></i>");
 			$eraseIcon
 				.appendTo($li)
@@ -418,12 +453,27 @@ var drawColumnsContentA = function(){
 			.attr("data-col",chosenListB)
 			.css({"text-align":"left","list-style":"none"})
 		listB.forEach(function(x,i){
+			let item = x;
+			let id = x;
+			if(displayMode == "alternateView"){
+				let count = -1;
+				let sep = "";
+				for(key in x){
+					count++;
+					if(count == linksOnColumn){
+						id = x[key];
+					}else{
+						item += sep+x[key];
+						sep = " | ";
+					}
+				}
+			}
             var isMandatory = (mandatories.indexOf(x) != -1);
 			var $li =  $("<li></li>");
 			$li
 				.appendTo($ulB)
 				.attr("data-offset",i)
-				.attr("data-name",x)
+				.attr("data-name",id)
 				.attr("data-mandatory", isMandatory)
 				.attr("draggable","true");
 			var $div =$("<div></div>");
@@ -434,7 +484,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(x);
+				.text(item);
 				if (isMandatory && mandatoryTooltips) {
 					$li
 						.attr("data-placement", "top")
