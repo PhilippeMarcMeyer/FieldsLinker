@@ -478,15 +478,15 @@ var drawColumnsContentA = function(){
 		});
 		// Computing the vertical offset of the middle of each cell.
 		ListHeights2 = [];
-	$(factory).find(".FL-main .FL-right li").each(function(i){
-		var position = $(this).position();
-		var hInner = $(this).height();
-		var hOuter = $(this).outerHeight();
-		var delta = Math.floor(0.5 + (hOuter - hInner)/2);
-		var midInner = Math.floor(0.5 + hInner/2);
-		var midHeight = position.top + midInner - delta;
-		ListHeights2.push(midHeight);
-	});
+		$(factory).find(".FL-main .FL-right li").each(function(i){
+			var position = $(this).position();
+			var hInner = $(this).height();
+			var hOuter = $(this).outerHeight();
+			var delta = Math.floor(0.5 + (hOuter - hInner)/2);
+			var midInner = Math.floor(0.5 + hInner/2);
+			var midHeight = position.top + midInner - delta;
+			ListHeights2.push(midHeight);
+		});
 	// Mouse up on the right side
 	$(factory).find(".FL-main .FL-right li").off("mouseup").on("mouseup", function (e) {
 		if (isDisabled) return;
@@ -501,7 +501,7 @@ var drawColumnsContentA = function(){
 			makeLink(infos);
 			}
 	});
-		$(factory).find(".FL-main .FL-right li").off("dblclick").on("dblclick", function (e) {
+	$(factory).find(".FL-main .FL-right li").off("dblclick").on("dblclick", function (e) {
 		if (isDisabled) return;
 			eraseLinkB($(this).data("name")); // we erase an existing link if any
 			draw();
