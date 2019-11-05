@@ -1,6 +1,6 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.86
-   v 0.86 : Modifications if Bootstrap is not available : tooltip are basic html titles and the links are horizontally centered
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.87
+   v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
 let FL_Factory_Lists = null;
 
@@ -42,9 +42,11 @@ let FL_Factory_Lists = null;
 	var isDisabled = false;
 	var globalAlpha = 1;
 	let mandatories = [];
+	let isTouchScreen = is_touch_device();
+	let mobileClickIt = false;
+	
 	var draw = function () {
 		var tablesAB = chosenListA+"|"+chosenListB; // existingLinks
-		//{"tables":tablesAB,"from":infos.nameA,"to":infos.nameB}
 	    canvasCtx.globalAlpha = globalAlpha;
 		canvasCtx.beginPath();
 		canvasCtx.fillStyle = 'white';
@@ -161,6 +163,9 @@ let FL_Factory_Lists = null;
 		}
 		if (data.options.canvasTopOffset) {
 			canvasTopOffset = data.options.canvasTopOffset;
+		}
+		if(data.options.mobileClickIt && isTouchScreen){
+			mobileClickIt = true;
 		}
 		if (data.options.effectHover) {
             effectHover = data.options.effectHover;
@@ -298,7 +303,9 @@ var drawColumnsContentA = function(){
 				.css({"right":"8px","color":"#aaa","position": "absolute","top":"50%","transform": "translateY(-50%)"});
 		});
 	// Computing the vertical offset of the middle of each cell.
+	
 	ListHeights1 = [];
+	
 	$(factory).find(".FL-main .FL-left li").each(function(i){
 		var position = $(this).position();
 		var hInner = $(this).height();
@@ -311,100 +318,126 @@ var drawColumnsContentA = function(){
 			canvasTopMarg = position.top;
 		}
 	});
-			// On mousedown in left List :
-	$(factory).find(".FL-main .FL-left li").off("mousedown").on("mousedown",function(e){
-		// we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
-		if (isDisabled) return;
-		move = {};
-		move.offsetA = $(this).data("offset");
-		move.nameA = $(this).data("name");
-		move.offsetB = -1;
-		move.nameB = -1;
-	});
+	
+	if(!mobileClickIt){
+		$(factory).find(".FL-main .FL-left li").off("mousedown").on("mousedown",function(e){
+			// we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
+			if (isDisabled) return;
+			move = {};
+			move.offsetA = $(this).data("offset");
+			move.nameA = $(this).data("name");
+			move.offsetB = -1;
+			move.nameB = -1;
+		});
+	}
+	
+	if(isTouchScreen && !mobileClickIt){
+				// On mousedown in left List :
 
-	$(factory).find(".link").off("touchstart").on("touchstart",function(e){
-		if (isDisabled) return;
-		move = {};
-		move.offsetA = $(this).parent().data("offset");
-		move.nameA = $(this).parent().data("name");
-		move.offsetB = -1;
-		move.nameB = -1;
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.touches[0];
-				if(move != null){
-					var mouseEvent = new MouseEvent("mousedown", {
+
+		$(factory).find(".link").off("touchstart").on("touchstart",function(e){
+			if (isDisabled) return;
+			move = {};
+			move.offsetA = $(this).parent().data("offset");
+			move.nameA = $(this).parent().data("name");
+			move.offsetB = -1;
+			move.nameB = -1;
+				var originalEvent = e.originalEvent;
+				if(originalEvent!=null && originalEvent.touches != undefined) {
+					var touch = originalEvent.touches[0];
+					if(move != null){
+						var mouseEvent = new MouseEvent("mousedown", {
+							clientX: touch.clientX,
+							clientY: touch.clientY
+						});
+						drawImmediate(mouseEvent);
+					}
+				}
+		});
+		
+		$(factory).find(".link").off("touchmove").on("touchmove",function(e){
+				var originalEvent = e.originalEvent;
+				if(originalEvent!=null && originalEvent.touches != undefined) {
+					var touch = originalEvent.touches[0];
+					var mouseEvent = new MouseEvent("mousemove", {
 						clientX: touch.clientX,
 						clientY: touch.clientY
 					});
-					drawImmediate(mouseEvent);
+					
+					if(move != null){
+						drawImmediate(mouseEvent);
+					}
+
 				}
+		});
+		
+		$(factory).find(".link").off("touchend").on("touchend",function(e){
+				if (isDisabled) return;
 
-			}
-
-	});
-	
-	
-	$(factory).find(".link").off("touchmove").on("touchmove",function(e){
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.touches[0];
-				var mouseEvent = new MouseEvent("mousemove", {
-					clientX: touch.clientX,
-					clientY: touch.clientY
-				});
-				
-				if(move != null){
-					drawImmediate(mouseEvent);
-				}
-
-			}
-	});
-	$(factory).find(".link").off("touchend").on("touchend",function(e){
-			if (isDisabled) return;
-
-			var originalEvent = e.originalEvent;
-			if(originalEvent!=null && originalEvent.touches != undefined) {
-				var touch = originalEvent.changedTouches[0];
-				var mousePosition = {x:touch.clientX,y:touch.clientY};
-				if(move != null){
-					let found = false;
-					$(factory).find(".FL-main .FL-right li").each(function(i){
-						if(!found){
-						var rect = this.getBoundingClientRect();
-						//left, top, right, bottom, width, height
-						if(mousePosition.x >= rect.left && mousePosition.x <= rect.right && mousePosition.y >= rect.top && mousePosition.y <= rect.bottom){ 
-							if(associationMode=="oneToOne"){
-								eraseLinkB($(this).data("name")); // we erase an existing link if any
+				var originalEvent = e.originalEvent;
+				if(originalEvent!=null && originalEvent.touches != undefined) {
+					var touch = originalEvent.changedTouches[0];
+					var mousePosition = {x:touch.clientX,y:touch.clientY};
+					if(move != null){
+						let found = false;
+						$(factory).find(".FL-main .FL-right li").each(function(i){
+							if(!found){
+							var rect = this.getBoundingClientRect();
+							//left, top, right, bottom, width, height
+							if(mousePosition.x >= rect.left && mousePosition.x <= rect.right && mousePosition.y >= rect.top && mousePosition.y <= rect.bottom){ 
+								if(associationMode=="oneToOne"){
+									eraseLinkB($(this).data("name")); // we erase an existing link if any
+								}
+								move.offsetB = $(this).data("offset");
+								move.nameB = $(this).data("name");
+								var infos =  JSON.parse(JSON.stringify(move));
+								move = null;
+								makeLink(infos);
+								found = true;
 							}
-							move.offsetB = $(this).data("offset");
-							move.nameB = $(this).data("name");
-							var infos =  JSON.parse(JSON.stringify(move));
-							move = null;
-							makeLink(infos);
-							found = true;
+							}
+						});	
+						if(!found){
+							draw();
 						}
-						}
-					});	
-					if(!found){
-						draw();
 					}
 				}
-
-			}
-
-	});
+		});
+	}
 	
-	$(factory).find(".FL-main .FL-left li .unlink").off("click").on("click", function (e) {
+	if(!mobileClickIt){
+		$(factory).find(".FL-main .FL-left li").off("mouseup").on("mouseup" , function (e) {
+			if (isDisabled) return;
+			// We do a mouse up on the left side : the drag is canceled
+			move = null;
+		});
+		
+		$(factory).find(".FL-main .FL-left li").off("click").on("click", function (e) {
+			if (isDisabled) return;
+			eraseLinkA($(this).parent().data("name"));
+			draw();
+		});
+	}
+	
+	if(mobileClickIt){
+		$(factory).find(".link").off("click").on("click",function(e){
+			if (isDisabled) return;
+			move = {};
+			move.offsetA = $(this).parent().data("offset");
+			move.nameA = $(this).parent().data("name");
+			move.offsetB = -1;
+			move.nameB = -1;
+		});
+	}
+	
+	$(factory).find(".unlink").off("click").on("click", function (e) {
 		if (isDisabled) return;
 		eraseLinkA($(this).parent().data("name"));
 		draw();
 	});
-	$(factory).find(".FL-main .FL-left li").off("mouseup").on("mouseup" , function (e) {
-		if (isDisabled) return;
-		// We do a mouse up on le teft side : the drag is canceled
-		move=null;
-	});
+	
+
+
 	}
 	var drawColumnsContentB = function(){
 		var $ulB =	$(".FL-right ul");
@@ -493,6 +526,17 @@ var drawColumnsContentA = function(){
 			canvasCtx.stroke();
 		}
 	});
+	
+	if(mobileClickIt){
+		$(factory).find(".FL-right li").off("click").on("click", function (e) {
+			if (isDisabled) return;
+			move.offsetB = $(this).data("offset");
+			move.nameB = $(this).data("name");
+			var infos =  JSON.parse(JSON.stringify(move));
+			move = null;
+			makeLink(infos);
+		});
+	}
 	}
 var createCanvas = function(){
    canvasId = "cnv_"+Date.now();
@@ -852,4 +896,20 @@ if(src.col == dest.col && src.offset != dest.offset && src.name != dest.name){
 		});
 		$("body").trigger("LM_Message_Redraw")
     }
+}
+
+function is_touch_device() { // from bolmaster2 - stackoverflow
+  var prefixes = ' -webkit- -moz- -o- -ms- '.split(' ');
+  var mq = function(query) {
+    return window.matchMedia(query).matches;
+  }
+
+  if (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+    return true;
+  }
+
+  // include the 'heartz' as a way to have a non matching MQ to help terminate the join
+  // https://git.io/vznFH
+  var query = ['(', prefixes.join('touch-enabled),('), 'heartz', ')'].join('');
+  return mq(query);
 }
