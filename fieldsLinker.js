@@ -13,8 +13,10 @@ let FL_Factory_Lists = null;
 	var listNames = [];
 	var listA = [];
 	var listB = [];
-	var chosenListA = ""//existingLinks
+	var chosenListA = ""
 	var chosenListB = ""
+	var keyNameA = ""
+	var keyNameB = ""
 	var dropDownForLists = null;
 	var canvasTopMarg = 0;
 	var $leftDiv,$midDiv,$rightDiv,$canvas;
@@ -64,15 +66,15 @@ let FL_Factory_Lists = null;
 			if(displayMode == "original"){
 					positionA = listA.indexOf(item.from);
 					positionB = listB.indexOf(item.to);
-			}else if(displayMode == "original"){
+			}else if(displayMode == "alternateView"){
 				listA.forEach(function(x,j){
-					if(x[listA.keyName] == item.from){
-						positionA = i;
+					if(x[keyNameA] == item.from){
+						positionA = j;
 					}
 				});
 				listB.forEach(function(x,j){
-					if(x[listB.keyName] == item.to){
-						positionB = i;
+					if(x[keyNameB] == item.to){
+						positionB = j;
 					}
 				});
 
@@ -212,6 +214,9 @@ let FL_Factory_Lists = null;
 			chosenListA = data.Lists[0].name;
 			chosenListB = data.Lists[1].name;
 		}
+		keyNameA = data.Lists[0].keyName || "";
+		keyNameB = data.Lists[1].keyName || "";
+		
 		data.Lists.forEach(function(x){
 			listNames.push(x.name);
 			if(x.name == chosenListA){
@@ -730,6 +735,12 @@ var setListeners = function(){
 							data.Lists[i].list[j] += "("+dict[val]+")";
 						}
 					}
+				}
+			}else if (displayMode == "alternateView"){
+				if(!data.Lists[0].keyName || !data.Lists[1].keyName){
+					onError = true;
+					console.log(errMsg + "alternateView mode : provide keyName properties" );
+					return;
 				}
 			}
 			fillChosenLists();
