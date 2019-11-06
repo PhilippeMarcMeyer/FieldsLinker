@@ -16,7 +16,7 @@ You can link on a one to one basis or on a one to many basis. Fields can be decl
 v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
 
 ```
-				var input = {
+			var input = {
 			    "localization":{
  				},
 			    "options":{
@@ -53,6 +53,9 @@ v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "t
 		  fieldLinks=$("#alternateView").fieldsLinker("init",input);
 ```
 
+See the demo for this new mode here : https://philippemarcmeyer.github.io/FieldsLinker/indexTable.html
+
+Original mode is still here : https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
 v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 
