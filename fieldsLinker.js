@@ -44,10 +44,8 @@ let FL_Factory_Lists = null;
 	var isDisabled = false;
 	var globalAlpha = 1;
 	let mandatories = [];
-	var displayMode = "original";
-	var linksOnColumn=0;
-	var hideLink= true;
-
+	let displayMode = "original";
+	let hideLink= false;
 	
 	var draw = function () {
 		var tablesAB = chosenListA+"|"+chosenListB; // existingLinks
@@ -182,12 +180,10 @@ let FL_Factory_Lists = null;
 				displayMode = "original";
 			}
 		}
+
 		if(displayMode == "alternateView"){
-			if(data.options.linksOnColumn){
-				linksOnColumn = data.options.linksOnColumn;
-			}
-			if(data.options.hideLink){
-				hideLink = data.options.hideLink;
+			if(data.options.displayModeHideKey){
+				hideLink = data.options.displayModeHideKey;
 			}
 		}
 		if(data.options.handleColor){
@@ -298,7 +294,7 @@ let FL_Factory_Lists = null;
 		}
 	}
 	
-var drawColumnsContentA = function(){
+	var drawColumnsContentA = function(){
 		var $ulA =	$(".FL-left ul");
 		if($ulA.length == 1){
 			$ulA.empty();
@@ -309,21 +305,35 @@ var drawColumnsContentA = function(){
 			.appendTo($leftDiv)
 			.attr("data-col",chosenListA)
 			.css({"text-align":"left","list-style":"none"});
+			
+
+		
 		listA.forEach(function(x,i){
+			let nrItems = Object.keys(x).length;
+			if(hideLink){
+				nrItems--;
+			}
+			if(nrItems < 0){
+				nrItems=1;
+			}
+			let percent = (100/nrItems)+"%";
 			var $li =  $("<li></li>");
 			let item = x;
 			let id = x;
 			if(displayMode == "alternateView"){
-				item = "";
+				item = "<table style='width:100%;'><tbody><tr>";
 				let sep = "";
 				for(key in x){
-					if(key == listA.keyName){
+					if(key == keyNameA){
 						id = x[key];
+						if(!hideLink){
+							item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+						}
 					}else{
-						item += sep+x[key];
-						sep = " | ";
+						item += '<td style="width:'+percent+';">' + x[key] + '</td>';
 					}
 				}
+				item+="</tr></tbody></table>";
 			}
 
 			$li
@@ -331,7 +341,7 @@ var drawColumnsContentA = function(){
 				.attr("data-offset",i)
 				.attr("data-name",id)
 				.css({"width":"100%","position": "relative"});
-			var $div =$("<div></div>");
+			var $div = $("<div></div>");
 			$div
 				.appendTo($li)
 				.attr("ondrop","LM_drop(event)")
@@ -339,7 +349,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(item);
+				.html(item);
 			var $eraseIcon = $("<i></i>");
 			$eraseIcon
 				.appendTo($li)
@@ -473,20 +483,34 @@ var drawColumnsContentA = function(){
 			.appendTo($rightDiv)
 			.attr("data-col",chosenListB)
 			.css({"text-align":"left","list-style":"none"})
+		
+		
 		listB.forEach(function(x,i){
 			let item = x;
 			let id = x;
 			if(displayMode == "alternateView"){
-				item = "";
+			let nrItems = Object.keys(x).length;
+				if(hideLink){
+					nrItems--;
+				}
+				if(nrItems < 0){
+					nrItems=1;
+				}
+			let percent = (100/nrItems)+"%";
+			
+				item = "<table style='width:100%;'><tbody><tr>";
 				let sep = "";
 				for(key in x){
-					if(key == listA.keyName){
+					if(key == keyNameB){
 						id = x[key];
+						if(!hideLink){
+							item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+						}
 					}else{
-						item += sep+x[key];
-						sep = " | ";
+						item += '<td style="width:'+percent+';">' + x[key] + '</td>';
 					}
 				}
+				item+="</tr></tbody></table>";
 			}
             var isMandatory = (mandatories.indexOf(x) != -1);
 			var $li =  $("<li></li>");
@@ -504,7 +528,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(item);
+				.html(item);
 				if (isMandatory && mandatoryTooltips) {
 					$li
 						.attr("data-placement", "top")

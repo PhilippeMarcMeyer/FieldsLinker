@@ -201,10 +201,9 @@ input[type=radio] {
 	  	</div>	  
 	  </div>
 	     <hr/>	  
-	  <div class="bonds" id="original" style="display:block;">
+	  <div class="bonds" id="alternateView" style="display:block;">
 	
 	  </div>
-
 	 <hr/>
 		<button type="button" class="btn fieldLinkerSave btn-sm btn-primary">Save links</button>
 		&nbsp;<span id="output"></span>
@@ -226,68 +225,51 @@ input[type=radio] {
 	<script>  
 	var fieldLinks;
 		$( document ).ready(function() {
-			var inputOri = {
+
+				var input = {
 			    "localization":{
  				},
 			    "options":{
 					"associationMode":"manyToMany", // oneToOne,manyToMany
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
-					"displayMode" :"original"
-				},
+					"displayMode" :"alternateView",
+					"displayModeHideKey" :true // default is false
+					},
 					"Lists":[
 						{
-							"name":"Columns in files",
+							"name":"Students",
+							"keyName" : "Id",
 							"list" : [
-								"firstName",
-								"lastName",
-								"phone",
-								"email",
-								"role",
-								"Birthday",
-								"Adress",
-								"Sales",
-								"City"
+							   {"Id":1,"Name":"Scott","Address":"Albama"},
+							   {"Id":2,"Name":"Andrew","Address":"Alaska"}
 							]
 						},
 						{
-							"name":"Available Fields",
+							"name":"Courses",
+							"keyName" : "CourseId",
 							"list" : [
-								"Company",
-								"jobTitle",
-								"adress",	
-								"adress",
-								"adress",								
-								"first_name",
-								"last_name",
-								"email_adress",
-								"Phone number"
-							],
-							"mandatories" :[
-								"last_name",
-								"email_adress"
+								{"CourseId":1,"CourseName":"Analytics"},
+								{"CourseId":2,"CourseName":"DataScience"},
+								{"CourseId":3,"CourseName":"JQuery"},
+								{"CourseId":4,"CourseName":"JavaScript"},
+								{"CourseId":5,"CourseName":"MVC"}
 							]
 						}
 						],
-
-					"existingLinks" : [{"from":"lastName","to":"last_name"},{"from":"firstName","to":"first_name"},{"from":"role","to":"jobTitle"}]
+					"existingLinks" : [{"from":1,"to":1},{"from":1,"to":2},{"from":1,"to":4},{"from":2,"to":1}]
 			};
 			
-			/*
+		  fieldLinks=$("#alternateView").fieldsLinker("init",input);
 			$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");
 				$("#output").html("output => " + JSON.stringify(results));
 			});
-			*/
-			// ------ alernateView
-
-
-		  fieldLinks=$("#original").fieldsLinker("init",inputOri);
-		
+			
 
 		});
 		
- 
+
 		$("input[name='associationMode']").on("click", function () {
 		 let choice = $(this).val();
 			fieldLinks.fieldsLinker("changeParameters",{"associationMode":choice});
