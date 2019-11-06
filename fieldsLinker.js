@@ -13,8 +13,10 @@ let FL_Factory_Lists = null;
 	var listNames = [];
 	var listA = [];
 	var listB = [];
-	var chosenListA = ""//existingLinks
+	var chosenListA = ""
 	var chosenListB = ""
+	var keyNameA = ""
+	var keyNameB = ""
 	var dropDownForLists = null;
 	var canvasTopMarg = 0;
 	var $leftDiv,$midDiv,$rightDiv,$canvas;
@@ -42,8 +44,13 @@ let FL_Factory_Lists = null;
 	var isDisabled = false;
 	var globalAlpha = 1;
 	let mandatories = [];
+
+	let displayMode = "original";
+	let hideLink= false;
+
 	let isTouchScreen = is_touch_device();
 	let mobileClickIt = false;
+
 	
 	var draw = function () {
 		var tablesAB = chosenListA+"|"+chosenListB; // existingLinks
@@ -56,8 +63,24 @@ let FL_Factory_Lists = null;
 			return x.tables == tablesAB;
 		});
 		links.forEach(function(item,i){
-			var positionA = listA.indexOf(item.from);
-			var positionB = listB.indexOf(item.to);
+				var positionA = -1
+				var positionB = -1
+			if(displayMode == "original"){
+					positionA = listA.indexOf(item.from);
+					positionB = listB.indexOf(item.to);
+			}else if(displayMode == "alternateView"){
+				listA.forEach(function(x,j){
+					if(x[keyNameA] == item.from){
+						positionA = j;
+					}
+				});
+				listB.forEach(function(x,j){
+					if(x[keyNameB] == item.to){
+						positionB = j;
+					}
+				});
+
+			}
 			if(positionB == -1 || positionA == -1){
 				console.log("error link names unknown");
 				return;
@@ -155,6 +178,18 @@ let FL_Factory_Lists = null;
 		if(data.options.lineColor){
 			lineColor = data.options.lineColor;
 		}
+		if(data.options.displayMode){
+			displayMode = data.options.displayMode;
+			if(displayMode != "alternateView"){
+				displayMode = "original";
+			}
+		}
+
+		if(displayMode == "alternateView"){
+			if(data.options.displayModeHideKey){
+				hideLink = data.options.displayModeHideKey;
+			}
+		}
 		if(data.options.handleColor){
 			handleColor = data.options.handleColor.split(",");
 		}
@@ -182,6 +217,9 @@ let FL_Factory_Lists = null;
 			chosenListA = data.Lists[0].name;
 			chosenListB = data.Lists[1].name;
 		}
+		keyNameA = data.Lists[0].keyName || "";
+		keyNameB = data.Lists[1].keyName || "";
+		
 		data.Lists.forEach(function(x){
 			listNames.push(x.name);
 			if(x.name == chosenListA){
@@ -262,7 +300,8 @@ let FL_Factory_Lists = null;
 				.html(data.options.buttonErase);
 		}
 	}
-var drawColumnsContentA = function(){
+	
+	var drawColumnsContentA = function(){
 		var $ulA =	$(".FL-left ul");
 		if($ulA.length == 1){
 			$ulA.empty();
@@ -273,14 +312,43 @@ var drawColumnsContentA = function(){
 			.appendTo($leftDiv)
 			.attr("data-col",chosenListA)
 			.css({"text-align":"left","list-style":"none"});
+			
+
+		
 		listA.forEach(function(x,i){
+			let nrItems = Object.keys(x).length;
+			if(hideLink){
+				nrItems--;
+			}
+			if(nrItems < 0){
+				nrItems=1;
+			}
+			let percent = (100/nrItems)+"%";
 			var $li =  $("<li></li>");
+			let item = x;
+			let id = x;
+			if(displayMode == "alternateView"){
+				item = "<table style='width:100%;'><tbody><tr>";
+				let sep = "";
+				for(key in x){
+					if(key == keyNameA){
+						id = x[key];
+						if(!hideLink){
+							item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+						}
+					}else{
+						item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+					}
+				}
+				item+="</tr></tbody></table>";
+			}
+
 			$li
 				.appendTo($ulA)
 				.attr("data-offset",i)
-				.attr("data-name",x)
+				.attr("data-name",id)
 				.css({"width":"100%","position": "relative"});
-			var $div =$("<div></div>");
+			var $div = $("<div></div>");
 			$div
 				.appendTo($li)
 				.attr("ondrop","LM_drop(event)")
@@ -288,7 +356,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(x);
+				.html(item);
 			var $eraseIcon = $("<i></i>");
 			$eraseIcon
 				.appendTo($li)
@@ -450,13 +518,41 @@ var drawColumnsContentA = function(){
 			.appendTo($rightDiv)
 			.attr("data-col",chosenListB)
 			.css({"text-align":"left","list-style":"none"})
+		
+		
 		listB.forEach(function(x,i){
+			let item = x;
+			let id = x;
+			if(displayMode == "alternateView"){
+			let nrItems = Object.keys(x).length;
+				if(hideLink){
+					nrItems--;
+				}
+				if(nrItems < 0){
+					nrItems=1;
+				}
+			let percent = (100/nrItems)+"%";
+			
+				item = "<table style='width:100%;'><tbody><tr>";
+				let sep = "";
+				for(key in x){
+					if(key == keyNameB){
+						id = x[key];
+						if(!hideLink){
+							item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+						}
+					}else{
+						item += '<td style="width:'+percent+';">' + x[key] + '</td>';
+					}
+				}
+				item+="</tr></tbody></table>";
+			}
             var isMandatory = (mandatories.indexOf(x) != -1);
 			var $li =  $("<li></li>");
 			$li
 				.appendTo($ulB)
 				.attr("data-offset",i)
-				.attr("data-name",x)
+				.attr("data-name",id)
 				.attr("data-mandatory", isMandatory)
 				.attr("draggable","true");
 			var $div =$("<div></div>");
@@ -467,7 +563,7 @@ var drawColumnsContentA = function(){
 				.attr("ondragstart","LM_drag(event)")
 				.attr("draggable","true")
 				.css({"width":"80%"})
-				.text(x);
+				.html(item);
 				if (isMandatory && mandatoryTooltips) {
 					$li
 						.attr("data-placement", "top")
@@ -692,20 +788,31 @@ var setListeners = function(){
 	            console.log(errMsg + "provide at least 2 lists" );
 				return;
 			}
+
+			readUserPreferences();
+			
 			listsNr = data.Lists.length;
-			for(let i = 0 ; i < listsNr;i++){
-				let dict = {};
-				for(let j = 0 ; j < data.Lists[i].list.length;j++){
-					let val = data.Lists[i].list[j];
-					if(!dict[val]){
-						dict[val] = 1;
-					}else{
-						dict[val]+=1;
-						data.Lists[i].list[j] += "("+dict[val]+")";
+			
+			if(displayMode == "original"){
+				for(let i = 0 ; i < listsNr;i++){
+					let dict = {};
+					for(let j = 0 ; j < data.Lists[i].list.length;j++){
+						let val = data.Lists[i].list[j];
+						if(!dict[val]){
+							dict[val] = 1;
+						}else{
+							dict[val]+=1;
+							data.Lists[i].list[j] += "("+dict[val]+")";
+						}
 					}
 				}
+			}else if (displayMode == "alternateView"){
+				if(!data.Lists[0].keyName || !data.Lists[1].keyName){
+					onError = true;
+					console.log(errMsg + "alternateView mode : provide keyName properties" );
+					return;
+				}
 			}
-			readUserPreferences();
 			fillChosenLists();
 			makeDropDownForLists();
 			drawColumnsAtLoadTime();
