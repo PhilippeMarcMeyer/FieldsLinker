@@ -13,6 +13,49 @@ You can link on a one to one basis or on a one to many basis. Fields can be decl
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
 
+v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
+
+```
+				var input = {
+			    "localization":{
+ 				},
+			    "options":{
+					"associationMode":"manyToMany", // oneToOne,manyToMany
+					"lineStyle":"square-ends",
+					"buttonErase":"Erase Links",
+					"displayMode" :"alternateView",
+					"displayModeHideKey" :true // default is false
+					},
+					"Lists":[
+						{
+							"name":"Students",
+							"keyName" : "Id",
+							"list" : [
+							   {"Id":1,"Name":"Scott","Address":"Albama"},
+							   {"Id":2,"Name":"Andrew","Address":"Alaska"}
+							]
+						},
+						{
+							"name":"Courses",
+							"keyName" : "CourseId",
+							"list" : [
+								{"CourseId":1,"CourseName":"Analytics"},
+								{"CourseId":2,"CourseName":"DataScience"},
+								{"CourseId":3,"CourseName":"JQuery"},
+								{"CourseId":4,"CourseName":"JavaScript"},
+								{"CourseId":5,"CourseName":"MVC"}
+							]
+						}
+						],
+					"existingLinks" : [{"from":1,"to":1},{"from":1,"to":2},{"from":1,"to":4},{"from":2,"to":1}]
+			};
+			
+		  fieldLinks=$("#alternateView").fieldsLinker("init",input);
+```
+
+
+v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
+
 v 0.86 : Modifications if Bootstrap is not available : tooltip are basic html titles and the links are horizontally centered
 
 v 0.85 : Mobile friendly (requested by a user)
