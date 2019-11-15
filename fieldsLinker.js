@@ -482,7 +482,7 @@ let FL_Factory_Lists = null;
 		
 		$(factory).find(".FL-main .FL-left li").off("click").on("click", function (e) {
 			if (isDisabled) return;
-			eraseLinkA($(this).parent().data("name"));
+			eraseLinkA($(this).data("name"));
 			draw();
 		});
 	}
@@ -500,7 +500,7 @@ let FL_Factory_Lists = null;
 	
 	$(factory).find(".unlink").off("click").on("click", function (e) {
 		if (isDisabled) return;
-		eraseLinkA($(this).parent().data("name"));
+		eraseLinkA($(this).data("name"));
 		draw();
 	});
 	
