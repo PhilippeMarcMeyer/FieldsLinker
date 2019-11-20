@@ -1,6 +1,7 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.88
-   v 0.88 : Corrected a bug that corrupted the links array of objects detected by flartet on github
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.89
+   v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
+   v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
    v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
 let FL_Factory_Lists = null;
