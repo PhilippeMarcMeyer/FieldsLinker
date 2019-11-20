@@ -11,7 +11,7 @@
     <!-- external css -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,500">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+	<link rel="stylesheet" SameSite="Lax" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -163,7 +163,7 @@ input[type=radio] {
   
 	  
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
-	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.87 Touch screen friendly<br/>New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins , make links more easily on touch devices just by clicking 
+	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v0.88 Touch screen friendly (+bug correction)<br/>New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins , make links more easily on touch devices just by clicking 
 	  <p>Allows to link elements of list A to elements of list B and returns the links in a js object</p>
 	  <ul class="presentation">
 	  <li>The elements of a list are sortable by drag and drop for a better lisibility</li>
@@ -209,10 +209,7 @@ input[type=radio] {
 		<button type="button" class="btn fieldLinkerSave btn-sm btn-primary">Save links</button>
 		&nbsp;<span id="output"></span>
 		<br /><br />
-		<div id="input">
-		
-		</div>
-
+		<div id="input"></div>
   </div>
   
   
@@ -274,13 +271,13 @@ input[type=radio] {
 					"existingLinks" : [{"from":"lastName","to":"last_name"},{"from":"firstName","to":"first_name"},{"from":"role","to":"jobTitle"}]
 			};
 			
-			/*
+	
 			$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");
 				$("#output").html("output => " + JSON.stringify(results));
 			});
-			*/
-			// ------ alernateView
+	
+	
 
 
 		  fieldLinks=$("#original").fieldsLinker("init",inputOri);

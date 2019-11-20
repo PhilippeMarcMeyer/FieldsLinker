@@ -1,5 +1,6 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.87
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.88
+   v 0.88 : Corrected a bug that corrupted the links array of objects detected by flartet on github
    v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
 let FL_Factory_Lists = null;
@@ -851,10 +852,9 @@ var setListeners = function(){
 		}else if( action === "getLinks") {
             if (!onError) {
                 var isMandatoryError = false;
-                var links = null;
+                let links = null;
                 var errorMessage = mandatoryErrorMessage + " : ";
                 var fieldInErrorName = "";
-                links = linksByName;
                 mandatories.forEach(function (m, i) {
                     if (!isMandatoryError) {
                         var match = linksByName.filter(function (link) {
@@ -873,8 +873,9 @@ var setListeners = function(){
                         "links": []
                     };
                 } else {
-					links.forEach(function(x){
-						delete x.tables;
+					links = [];
+					linksByName.forEach(function(x){
+						links.push({from:x.from,to:x.to});
 					});
                     return {
                         "error": false,
