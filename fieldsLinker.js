@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 /*
+
    https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.90
    v 0.90 : Code beautified by flartet 
    v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
@@ -6,6 +8,7 @@
    v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
 let FL_Factory_Lists = null;
+let FL_Original_Factory_Lists = null;
 
 (function ($) {
     var bootstrap_enabled = (typeof $().modal == 'function');
@@ -21,14 +24,12 @@ let FL_Factory_Lists = null;
     var keyNameA = '';
     var keyNameB = '';
     var dropDownForLists = null;
-    var canvasTopMarg = 0;
     var $leftDiv, $midDiv, $rightDiv, $canvas;
     var canvasId = '';
     var canvasCtx = null;
     var canvasPtr = null;
     var canvasWidth = 0;
     var canvasHeight = 0;
-    var canvasTopMargin;
     var mandatoryErrorMessage = 'This field is mandatory';
     var mandatoryTooltips = true;
     var onError = false;
@@ -41,16 +42,12 @@ let FL_Factory_Lists = null;
     var lineStyle = 'straight'; // straight or square-ends
     var handleColor = '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'.split(',');
     var lineColor = 'black';
-    var autoDetect = 'off';
     var associationMode = 'oneToOne';
-    var canvasTopOffset = 0;
     var isDisabled = false;
     var globalAlpha = 1;
     let mandatories = [];
-
     let displayMode = 'original';
     let hideLink = false;
-
     let isTouchScreen = is_touch_device();
     let mobileClickIt = false;
 
@@ -130,6 +127,7 @@ let FL_Factory_Lists = null;
                         linksByName.splice(i, 1);
                     }
                 }
+
                 for (var i = linksByName.length - 1; i >= 0; i--) {
                     if (linksByName[i].tables == tablesAB && linksByName[i].from == infos.nameA) {
                         linksByName.splice(i, 1);
@@ -203,17 +201,8 @@ let FL_Factory_Lists = null;
         if (data.options.associationMode) {
             associationMode = data.options.associationMode;
         }
-        if (data.options.canvasTopOffset) {
-            canvasTopOffset = data.options.canvasTopOffset;
-        }
         if (data.options.mobileClickIt && isTouchScreen) {
             mobileClickIt = true;
-        }
-        if (data.options.effectHover) {
-            effectHover = data.options.effectHover;
-            if (data.options.effectHoverBorderWidth != undefined) {
-                effectHoverBorderWidth = data.options.effectHoverBorderWidth;
-            }
         }
     };
     var fillChosenLists = function () {
@@ -267,6 +256,7 @@ let FL_Factory_Lists = null;
                 'width': '100%',
                 'text-align': 'left'
             });
+
         $leftDiv = $('<div></div>');
         $leftDiv
             .appendTo($main)
@@ -330,7 +320,59 @@ let FL_Factory_Lists = null;
         }
     };
 
+    var createFilterDiv = function (listIndex) {
+        if ($('.FL-filter-' + listIndex).length > 0) {
+            return false;
+        }
+        // création des éléments
+        let divFilter = $('<div></div>').addClass('FL-filter-' + listIndex);
+        let input = $('<input type="text" name="filter' + listIndex + '" id="iFilter' + listIndex + '" />');
+        let searchBtn = $('<button role="button" type="button" class="btn btn-small">' + data.options.buttonFilter + '</button>');
+        input.appendTo(divFilter);
+        searchBtn.appendTo(divFilter);
+
+        // fonction de filtre à proprement parler
+        searchBtn.click(function (e) {
+            // réaffectation de la liste originelle
+            FL_Factory_Lists.Lists[listIndex] = JSON.parse(JSON.stringify(FL_Original_Factory_Lists.Lists[listIndex]));
+            var filter = $(e.target).parent().find('input').val();
+            FL_Factory_Lists.Lists[listIndex].list = filterList(FL_Factory_Lists.Lists[listIndex].list, filter, FL_Factory_Lists.Lists[listIndex].keysFilter);
+            $(factory).fieldsLinker('init', FL_Factory_Lists);
+        });
+        return divFilter;
+    };
+
+
+    var filterList = function (list, filter, keysFilter) {
+        // en créer une nouvelle, pas de souci de ref
+        let re = RegExp(filter, 'i');
+        var newList = [];
+        list.forEach((item) => {
+            let found = false;
+            for (let i = 0;
+                (i < keysFilter.length && !found); i++) {
+                if (re.test(item[keysFilter[i]])) {
+                    newList.push(item);
+                    found = true;
+                }
+            }
+        });
+        return newList;
+    };
+
+    var computeListHeight = function (li) {
+        // outerHeight(true) adds margins too, full step is simply full outerHeight / 2 between li siblings
+        var step = Math.ceil($(li).outerHeight(true) / 2);
+        return  Math.floor($(li).position().top + step);
+    };
+
     var drawColumnsContentA = function () {
+        if (data.Lists[0].filter) {
+            var filterDiv = createFilterDiv(0);
+            if (filterDiv != false) {
+                filterDiv.appendTo($leftDiv);
+            }
+        }
         var $ulA = $('.FL-left ul');
         if ($ulA.length == 1) {
             $ulA.empty();
@@ -344,8 +386,6 @@ let FL_Factory_Lists = null;
                 'text-align': 'left',
                 'list-style': 'none'
             });
-
-
 
         listA.forEach(function (x, i) {
             let nrItems = Object.keys(x).length;
@@ -361,7 +401,6 @@ let FL_Factory_Lists = null;
             let id = x;
             if (displayMode == 'alternateView') {
                 item = '<table style=\'width:100%;\'><tbody><tr>';
-                let sep = '';
                 for (key in x) {
                     if (key == keyNameA) {
                         id = x[key];
@@ -423,17 +462,9 @@ let FL_Factory_Lists = null;
 
         ListHeights1 = [];
 
-        $(factory).find('.FL-main .FL-left li').each(function (i) {
-            var position = $(this).position();
-            var hInner = $(this).height();
-            var hOuter = $(this).outerHeight();
-            var delta = Math.ceil((hOuter - hInner) / 2);
-            var midInner = Math.ceil(hInner / 2);
-            var midHeight = position.top + midInner - delta - 1;
-            ListHeights1.push(midHeight);
-            if (i == 0) {
-                canvasTopMarg = position.top;
-            }
+        $(factory).find('.FL-main .FL-left li').each(function (i, li) {
+            var val = computeListHeight(li);
+            ListHeights1.push(val);
         });
 
         if (!mobileClickIt) {
@@ -450,15 +481,15 @@ let FL_Factory_Lists = null;
 
         if (isTouchScreen && !mobileClickIt) {
             // On mousedown in left List :
-
-
             $(factory).find('.link').off('touchstart').on('touchstart', function (e) {
+
                 if (isDisabled) return;
                 move = {};
                 move.offsetA = $(this).parent().data('offset');
                 move.nameA = $(this).parent().data('name');
                 move.offsetB = -1;
                 move.nameB = -1;
+
                 var originalEvent = e.originalEvent;
                 if (originalEvent != null && originalEvent.touches != undefined) {
                     var touch = originalEvent.touches[0];
@@ -557,9 +588,15 @@ let FL_Factory_Lists = null;
         });
 
 
-
     };
     var drawColumnsContentB = function () {
+        if (data.Lists[1].filter) {
+            var filterDiv = createFilterDiv(1);
+            if (filterDiv != false) {
+                filterDiv.appendTo($rightDiv);
+            }
+        }
+
         var $ulB = $('.FL-right ul');
         if ($ulB.length == 1) {
             $ulB.empty();
@@ -573,7 +610,6 @@ let FL_Factory_Lists = null;
                 'text-align': 'left',
                 'list-style': 'none'
             });
-
 
         listB.forEach(function (x, i) {
             let item = x;
@@ -631,14 +667,11 @@ let FL_Factory_Lists = null;
         });
         // Computing the vertical offset of the middle of each cell.
         ListHeights2 = [];
-        $(factory).find('.FL-main .FL-right li').each(function (i) {
-            var position = $(this).position();
-            var hInner = $(this).height();
-            var hOuter = $(this).outerHeight();
-            var delta = Math.ceil((hOuter - hInner) / 2);
-            var midInner = Math.ceil(hInner / 2);
-            var midHeight = position.top + midInner - delta;
-            ListHeights2.push(midHeight);
+
+        $(factory).find('.FL-main .FL-right li').each(function (i, li) {
+            var val = computeListHeight(li);
+            ListHeights2.push(val);
+
         });
         // Mouse up on the right side
         $(factory).find('.FL-main .FL-right li').off('mouseup').on('mouseup', function (e) {
@@ -690,7 +723,6 @@ let FL_Factory_Lists = null;
                 makeLink(infos);
             });
         }
-  
     };
     var createCanvas = function () {
         canvasId = 'cnv_' + Date.now();
@@ -712,15 +744,6 @@ let FL_Factory_Lists = null;
         canvasPtr.width = canvasWidth;
         canvasPtr.height = canvasHeight;
         canvasCtx = canvasPtr.getContext('2d');
-        canvasTopMargin = canvasTopOffset;
-        if (bootstrap_enabled) {
-            $canvas
-                .css('margin-top', canvasTopMarg + 'px');
-        } else {
-            $canvas
-                .css('margin-top', (canvasTopMarg - 10) + 'px');
-   
-        }
     };
 
     var getTouchPos = function (e) {
@@ -845,6 +868,9 @@ let FL_Factory_Lists = null;
             }
             data = JSON.parse(JSON.stringify(input));
             FL_Factory_Lists = data;
+            if (FL_Original_Factory_Lists == null) {
+                FL_Original_Factory_Lists = JSON.parse(JSON.stringify(data));
+            }
             if (!data.Lists || data.Lists.length < 2) {
                 onError = true;
                 console.log(errMsg + 'provide at least 2 lists');
@@ -1011,7 +1037,6 @@ let FL_Factory_Lists = null;
             globalAlpha = 0.5;
             draw();
             return (that);
-   
         } else if (action == 'enable') {
             isDisabled = false;
             $(factory)
@@ -1029,7 +1054,6 @@ let FL_Factory_Lists = null;
         } else {
             onError = true;
             console.log(errMsg + 'no action parameter provided (param 1)');
-   
         }
     };
 }(jQuery));
