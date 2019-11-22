@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
 /*
-https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.89
-v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
-v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
-v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
+
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.90
+   v 0.90 : Code beautified by flartet 
+   v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
+   v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
+   v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
 let FL_Factory_Lists = null;
 let FL_Original_Factory_Lists = null;
@@ -44,10 +46,8 @@ let FL_Original_Factory_Lists = null;
     var isDisabled = false;
     var globalAlpha = 1;
     let mandatories = [];
-
     let displayMode = 'original';
     let hideLink = false;
-
     let isTouchScreen = is_touch_device();
     let mobileClickIt = false;
 
@@ -114,7 +114,6 @@ let FL_Original_Factory_Lists = null;
         });
     };
     var makeLink = function (infos) {
-        console.log(infos);
         var tablesAB = chosenListA + '|' + chosenListB;
         var already = false;
         var test = linksByName.filter(function (x) {
@@ -128,7 +127,8 @@ let FL_Original_Factory_Lists = null;
                         linksByName.splice(i, 1);
                     }
                 }
-                for (i = linksByName.length - 1; i >= 0; i--) {
+
+                for (var i = linksByName.length - 1; i >= 0; i--) {
                     if (linksByName[i].tables == tablesAB && linksByName[i].from == infos.nameA) {
                         linksByName.splice(i, 1);
                     }
@@ -481,15 +481,15 @@ let FL_Original_Factory_Lists = null;
 
         if (isTouchScreen && !mobileClickIt) {
             // On mousedown in left List :
-
-
             $(factory).find('.link').off('touchstart').on('touchstart', function (e) {
+
                 if (isDisabled) return;
                 move = {};
                 move.offsetA = $(this).parent().data('offset');
                 move.nameA = $(this).parent().data('name');
                 move.offsetB = -1;
                 move.nameB = -1;
+
                 var originalEvent = e.originalEvent;
                 if (originalEvent != null && originalEvent.touches != undefined) {
                     var touch = originalEvent.touches[0];
@@ -611,7 +611,6 @@ let FL_Original_Factory_Lists = null;
                 'list-style': 'none'
             });
 
-
         listB.forEach(function (x, i) {
             let item = x;
             let id = x;
@@ -668,9 +667,11 @@ let FL_Original_Factory_Lists = null;
         });
         // Computing the vertical offset of the middle of each cell.
         ListHeights2 = [];
+
         $(factory).find('.FL-main .FL-right li').each(function (i, li) {
             var val = computeListHeight(li);
             ListHeights2.push(val);
+
         });
         // Mouse up on the right side
         $(factory).find('.FL-main .FL-right li').off('mouseup').on('mouseup', function (e) {
@@ -743,13 +744,6 @@ let FL_Original_Factory_Lists = null;
         canvasPtr.width = canvasWidth;
         canvasPtr.height = canvasHeight;
         canvasCtx = canvasPtr.getContext('2d');
-        // if(bootstrap_enabled){
-        // 	$canvas
-        // 		.css("margin-top", canvasTopMargin+"px");
-        // }else{
-        // 	$canvas
-        // 		.css("margin-top", (canvasTopMargin-10)+"px");
-        // }
     };
 
     var getTouchPos = function (e) {
