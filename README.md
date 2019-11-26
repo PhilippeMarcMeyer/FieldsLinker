@@ -9,6 +9,21 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
+### v0.90
+Canvas calulations fixes and other various fixes.
+
+Added the ability to have filters on top of columns and new related options (alternateView only) :
+```
+"options":{
+	"buttonFilter":"Filter", // value displayed on the filter button
+}
+"Lists":[{
+	"filter":true, // activate the filter on this column
+	"keysFilter": ["libelle"] // fields of the list where to find the searched string (Regex.test() behind the scenes)
+}]
+
+```
+
 ### v0.89 
 
 ![screen shot](https://raw.githubusercontent.com/PhilippeMarcMeyer/FieldsLinker/master/filedLinker.jpg)
