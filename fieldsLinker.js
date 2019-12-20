@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 /*
 
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.90
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.91
+   v 0.91 : fix mobileClickIt if set, add selected css classes
    v 0.90 : Code beautified by flartet 
    v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
    v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
@@ -201,7 +202,7 @@ let FL_Original_Factory_Lists = null;
         if (data.options.associationMode) {
             associationMode = data.options.associationMode;
         }
-        if (data.options.mobileClickIt && isTouchScreen) {
+        if (data.options.mobileClickIt) {
             mobileClickIt = true;
         }
     };
@@ -571,11 +572,14 @@ let FL_Original_Factory_Lists = null;
         }
 
         if (mobileClickIt) {
-            $(factory).find('.link').off('click').on('click', function (e) {
+            $(factory).find('.FL-left li').off('click').on('click', function (e) {
                 if (isDisabled) return;
+                const el = $(this);
+                $('.selected').removeClass('selected');
+                el.addClass('selected');                
                 move = {};
-                move.offsetA = $(this).parent().data('offset');
-                move.nameA = $(this).parent().data('name');
+                move.offsetA = el.data('offset');
+                move.nameA = el.data('name');
                 move.offsetB = -1;
                 move.nameB = -1;
             });
@@ -715,7 +719,8 @@ let FL_Original_Factory_Lists = null;
 
         if (mobileClickIt) {
             $(factory).find('.FL-right li').off('click').on('click', function (e) {
-                if (isDisabled) return;
+                $('.selected').removeClass('selected');
+                if (isDisabled || move === null) return;
                 move.offsetB = $(this).data('offset');
                 move.nameB = $(this).data('name');
                 var infos = JSON.parse(JSON.stringify(move));
