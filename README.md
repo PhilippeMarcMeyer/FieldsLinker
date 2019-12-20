@@ -9,6 +9,14 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
+### v0.91
+
+Fix `mobileClickIt` option:
+
+- if set to `true`, will use mobile mode, regardless of touch screen mode.
+- fix crash modeB `null` value
+- if selected (clicked), use CSS to invert element as visual feedback.
+
 ### v0.90
 Canvas calulations fixes and other various fixes.
 
