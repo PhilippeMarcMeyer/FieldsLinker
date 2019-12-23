@@ -93,18 +93,59 @@ input[type=radio] {
 	cursor: pointer;
 }
 
-	input[type=radio]:before {
-		background: white;
-		border: 2px solid #337ab7;
-		border-radius: 50%;
-		margin-top: -2px;
-		margin-right: 6px;
-		display: inline-block;
-		vertical-align: middle;
-		content: '';
-		width: 14px;
-		height: 14px;
-	}
+input[type=checkbox]::before{
+  content: "";
+  display: inline-block;
+  font-size: inherit;
+  float:left;
+  font-weight:bold;
+  margin-left:0;
+  margin-right:2px;
+  border: 2px solid #337ab7;
+  border-radius : 3px;
+  padding : 5px;
+  margin-top:0px;
+  color:black;
+  background: white;
+}
+
+input[type=checkbox].active::after {
+    content: "";
+    display: inline-block;
+    font-size: inherit;
+    float: left;
+	transform: rotate(45deg);
+    margin-left: 6px;
+    margin-top:-13px;
+	height: 10px;
+	width:  5px;
+    color: #337ab7;
+	border-bottom: 2px solid #337ab7;
+	border-right:  2px solid #337ab7;
+}
+
+div.action-check.off {
+    color: silver;
+}
+
+div.action-check {
+    color: black;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+input[type=radio]:before {
+	background: white;
+	border: 2px solid #337ab7;
+	border-radius: 50%;
+	margin-top: -2px;
+	margin-right: 6px;
+	display: inline-block;
+	vertical-align: middle;
+	content: '';
+	width: 14px;
+	height: 14px;
+}
 
 	input[type=radio]:checked:before {
 		background: #337ab7;
@@ -196,6 +237,11 @@ input[type=radio] {
 					  <input name="lineStyle" type="radio" value="straight"  /><label>straight</label>
 					  <input name="lineStyle" type="radio" value="square-ends" checked="checked" /><label>square-ends</label>
 				 </div>	 
+				 <div class="choices">
+					  <input name="mobileClickIt" type="checkbox"/><label>mobileClickIt</label>
+		
+				 </div>	
+				 
 		   </fieldset>
 			</div>	
 	  	</div>	  
@@ -222,8 +268,9 @@ input[type=radio] {
 	  
 	<script>  
 	var fieldLinks;
+	var inputOri;
 		$( document ).ready(function() {
-			var inputOri = {
+				inputOri = {
 			    "localization":{
  				},
 			    "options":{
@@ -231,7 +278,7 @@ input[type=radio] {
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
 					"displayMode" :"original",
-					"mobileClickIt":true
+					"mobileClickIt":false
 				},
 					"Lists":[
 						{
@@ -276,13 +323,7 @@ input[type=radio] {
 				var results = fieldLinks.fieldsLinker("getLinks");
 				$("#output").html("output => " + JSON.stringify(results));
 			});
-	
-	
-
-
 		  fieldLinks=$("#original").fieldsLinker("init",inputOri);
-		
-
 		});
 		
  
@@ -300,6 +341,19 @@ input[type=radio] {
 		$("input[name='lineStyle']").on("click", function () {
 		 let choice = $(this).val();
 			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":choice});
+		});
+		
+		$("input[name='mobileClickIt']").on("click", function () {
+			let isCheck = $(this).prop("checked");
+			if(isCheck)
+				$(this).addClass("active");
+			else
+				$(this).removeClass("active");
+			
+			$("#original").html="";
+			inputOri.options.mobileClickIt = isCheck;
+			fieldLinks=$("#original").fieldsLinker("init",inputOri);
+
 		});
 
 	 </script>  

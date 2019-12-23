@@ -202,8 +202,8 @@ let FL_Original_Factory_Lists = null;
         if (data.options.associationMode) {
             associationMode = data.options.associationMode;
         }
-        if (data.options.mobileClickIt) {
-            mobileClickIt = true;
+        if (data.options.mobileClickIt != undefined) {
+            mobileClickIt = data.options.mobileClickIt;
         }
     };
     var fillChosenLists = function () {
@@ -342,8 +342,6 @@ let FL_Original_Factory_Lists = null;
         });
         return divFilter;
     };
-
-
     var filterList = function (list, filter, keysFilter) {
         // en créer une nouvelle, pas de souci de ref
         let re = RegExp(filter, 'i');
