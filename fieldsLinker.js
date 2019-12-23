@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 /*
-
    https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.91
-   v 0.91 : fix mobileClickIt if set, add selected css classes
+   v 0.91 : fix mobileClickIt if set, add selected css classes, automatic mobileClickIt on touch devices
    v 0.90 : Code beautified by flartet 
    v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
    v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
@@ -80,7 +79,6 @@ let FL_Original_Factory_Lists = null;
                         positionB = j;
                     }
                 });
-
             }
             if (positionB == -1 || positionA == -1) {
                 console.log('error link names unknown');
@@ -190,7 +188,6 @@ let FL_Original_Factory_Lists = null;
                 displayMode = 'original';
             }
         }
-
         if (displayMode == 'alternateView') {
             if (data.options.displayModeHideKey) {
                 hideLink = data.options.displayModeHideKey;
@@ -204,6 +201,9 @@ let FL_Original_Factory_Lists = null;
         }
         if (data.options.mobileClickIt != undefined) {
             mobileClickIt = data.options.mobileClickIt;
+        }
+        if(isTouchScreen){
+            mobileClickIt = true;
         }
     };
     var fillChosenLists = function () {
@@ -358,13 +358,11 @@ let FL_Original_Factory_Lists = null;
         });
         return newList;
     };
-
     var computeListHeight = function (li) {
         // outerHeight(true) adds margins too, full step is simply full outerHeight / 2 between li siblings
         var step = Math.ceil($(li).outerHeight(true) / 2);
         return  Math.floor($(li).position().top + step);
     };
-
     var drawColumnsContentA = function () {
         if (data.Lists[0].filter) {
             var filterDiv = createFilterDiv(0);
@@ -412,7 +410,6 @@ let FL_Original_Factory_Lists = null;
                 }
                 item += '</tr></tbody></table>';
             }
-
             $li
                 .appendTo($ulA)
                 .attr('data-offset', i)
@@ -458,7 +455,6 @@ let FL_Original_Factory_Lists = null;
                 });
         });
         // Computing the vertical offset of the middle of each cell.
-
         ListHeights1 = [];
 
         $(factory).find('.FL-main .FL-left li').each(function (i, li) {
@@ -588,8 +584,6 @@ let FL_Original_Factory_Lists = null;
             eraseLinkA($(this).data('name'));
             draw();
         });
-
-
     };
     var drawColumnsContentB = function () {
         if (data.Lists[1].filter) {
@@ -781,9 +775,6 @@ let FL_Original_Factory_Lists = null;
 
     };
     var setListeners = function () {
-        // Mobiles 
-
-        // Listeners :
         if (data.options.buttonErase) {
             $(factory).find('.FL-main .eraseLink').on('click', function (e) {
                 if (isDisabled) return;
@@ -795,8 +786,6 @@ let FL_Original_Factory_Lists = null;
                 });
             });
         }
-
-
         // mousemove over the canvas
         $(factory).find('canvas').on('mousemove', function (e) {
             if (isDisabled) return;

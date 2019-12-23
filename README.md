@@ -16,6 +16,7 @@ Fix `mobileClickIt` option:
 - if set to `true`, will use mobile mode, regardless of touch screen mode.
 - fix crash modeB `null` value
 - if selected (clicked), use CSS to invert element as visual feedback.
+- mobileClickIt option is automatic on touch devices
 
 ### v0.90
 Canvas calulations fixes and other various fixes.
@@ -78,9 +79,11 @@ v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "t
 		  fieldLinks=$("#alternateView").fieldsLinker("init",input);
 ```
 
-See the demo for this new mode here : https://philippemarcmeyer.github.io/FieldsLinker/indexTable.html
+See the demo for this new mode here : 
+https://philippemarcmeyer.github.io/FieldsLinker/indexTable.html
 
-Original mode is still here : https://philippemarcmeyer.github.io/FieldsLinker/index.html
+Original mode is still here with MobileClickIt option to test: 
+https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
 v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 
