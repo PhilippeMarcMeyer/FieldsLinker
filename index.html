@@ -158,10 +158,13 @@ input[type=radio]:before {
 	}
 	
 	.choices label{
-		font-weight:normal;
 		margin-left:4px;
 		margin-right:4px;
 		vertical-align:8%;
+	}
+	
+	.choices label.group{
+		font-weight:bold;
 	}
 	
 	.nice-group{
@@ -239,8 +242,12 @@ input[type=radio]:before {
 				 </div>	 
 				 <div class="choices">
 					  <input name="mobileClickIt" type="checkbox"/><label>mobileClickIt</label>
-		
 				 </div>	
+				 <div class="choices">
+					  <label class="group">whiteSpace :</label> 
+					  <input name="whiteSpace" type="radio" value="normal"  /><label>normal</label>
+					  <input name="whiteSpace" type="radio" value="nowrap" checked="checked" /><label>nowrap</label>
+				 </div>	 
 				 
 		   </fieldset>
 			</div>	
@@ -265,7 +272,7 @@ input[type=radio]:before {
 
 
 	  <script src="./fieldsLinker.js"></script>
-	  
+
 	<script>  
 	var fieldLinks;
 	var inputOri;
@@ -278,6 +285,7 @@ input[type=radio]:before {
 					"lineStyle":"square-ends",
 					"buttonErase":"Erase Links",
 					"displayMode" :"original",
+					"whiteSpace":$("input[name='whiteSpace']:checked").val(), //normal,nowrap,pre,pre-wrap,pre-line,break-spaces default => nowrap
 					"mobileClickIt":false
 				},
 					"Lists":[
@@ -291,7 +299,7 @@ input[type=radio]:before {
 								"role",
 								"Birthday",
 								"Adress",
-								"Sales",
+								"[Main-stats][Global-sales-stats][European-region][France]",
 								"City"
 							]
 						},
@@ -306,7 +314,9 @@ input[type=radio]:before {
 								"first_name",
 								"last_name",
 								"email_adress",
-								"Phone number"
+								"Phone number",
+								"Pourcentage of france in the global market",
+
 							],
 							"mandatories" :[
 								"last_name",
@@ -341,6 +351,11 @@ input[type=radio]:before {
 		$("input[name='lineStyle']").on("click", function () {
 		 let choice = $(this).val();
 			fieldLinks.fieldsLinker("changeParameters",{"lineStyle":choice});
+		});
+		
+		$("input[name='whiteSpace']").on("click", function () {
+		 let choice = $(this).val();
+			fieldLinks.fieldsLinker("changeParameters",{"whiteSpace":choice});
 		});
 		
 		$("input[name='mobileClickIt']").on("click", function () {

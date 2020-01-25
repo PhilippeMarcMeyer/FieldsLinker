@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.91
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.92
+   v 0.92 : introducing new option : whiteSpace
    v 0.91 : fix mobileClickIt if set, add selected css classes, automatic mobileClickIt on touch devices
    v 0.90 : Code beautified by flartet 
    v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
@@ -47,6 +48,7 @@ let FL_Original_Factory_Lists = null;
     var globalAlpha = 1;
     let mandatories = [];
     let displayMode = 'original';
+    let whiteSpace ="nowrap";
     let hideLink = false;
     let isTouchScreen = is_touch_device();
     let mobileClickIt = false;
@@ -175,6 +177,9 @@ let FL_Original_Factory_Lists = null;
         if (data.options.className) {
             className = data.options.className;
         }
+        if(data.options.whiteSpace){
+            whiteSpace = data.options.whiteSpace;
+        }
         if (data.options.lineStyle) {
             if (data.options.lineStyle == 'square-ends' || data.options.lineStyle == 'square-ends-dotted')
                 lineStyle = data.options.lineStyle;
@@ -267,7 +272,7 @@ let FL_Original_Factory_Lists = null;
                 'width': '40%',
                 'display': 'inline-block',
                 'text-align': 'left',
-                'white-space': 'nowrap'
+                'white-space': whiteSpace
             })
             .append(dropDownForLists.clone());
         $leftDiv.find('select')
@@ -294,9 +299,18 @@ let FL_Original_Factory_Lists = null;
                 'width': '40%',
                 'display': 'inline-block',
                 'text-align': 'left',
-                'white-space': 'nowrap'
+                'white-space': whiteSpace
             })
             .append(dropDownForLists.clone());
+		if (data.options.buttonErase) {
+            var $btn = $('<button></button>');
+            $btn
+                .appendTo($(factory).find('.FL-main'))
+                .attr('type', 'button')
+                .addClass('btn btn-default btn-sm eraseLink')
+				.attr("style","position:absolute;top:-6px;right:0;opacity:0.9;")
+                .html(data.options.buttonErase);
+        }
         $rightDiv.find('select')
             .attr('id', 'select2')
             .val(chosenListB)
@@ -311,14 +325,7 @@ let FL_Original_Factory_Lists = null;
                 'text-align': 'left',
                 'list-style': 'none'
             });
-        if (data.options.buttonErase) {
-            var $btn = $('<button></button>');
-            $btn
-                .appendTo($(factory).find('.FL-main'))
-                .attr('type', 'button')
-                .addClass('btn btn-danger  btn-sm eraseLink')
-                .html(data.options.buttonErase);
-        }
+
     };
 
     var createFilterDiv = function (listIndex) {
@@ -974,6 +981,29 @@ let FL_Original_Factory_Lists = null;
                     var options = JSON.parse(JSON.stringify(input));
                     if (options.className) {
                         className = options.className;
+                    }
+                    if(options.whiteSpace){
+                        
+                        whiteSpace = options.whiteSpace;
+                        
+                        $(".FL-left").css("white-space",whiteSpace);
+                        $(".FL-right").css("white-space",whiteSpace);
+                        
+                        ListHeights2 = [];
+                        
+                        $(factory).find('.FL-main .FL-right li').each(function (i, li) {
+                            var val = computeListHeight(li);
+                            ListHeights2.push(val);
+
+                        });
+                        
+                        ListHeights1 = [];
+
+                        $(factory).find('.FL-main .FL-left li').each(function (i, li) {
+                            var val = computeListHeight(li);
+                            ListHeights1.push(val);
+                        });
+                        draw();
                     }
                     if (options.lineStyle) {
                         lineStyle = options.lineStyle;
