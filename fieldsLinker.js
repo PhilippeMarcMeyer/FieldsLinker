@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /*
    https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.92
+   v 0.95 : rewritten for multiples instances in mind
    v 0.92 : introducing new option : whiteSpace
    v 0.91 : fix mobileClickIt if set, add selected css classes, automatic mobileClickIt on touch devices
    v 0.90 : Code beautified by flartet 
@@ -8,76 +9,148 @@
    v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
    v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 */
-let FL_Factory_Lists = null;
-let FL_Original_Factory_Lists = null;
+let fieldsLinkerMemory = [];
 
-(function ($) {
-    var bootstrap_enabled = (typeof $().modal == 'function');
-    const errMsg = 'fieldsLinker error : ';
-    var factory;
-    var data = {};
-    var listsNr = 0;
-    var listNames = [];
-    var listA = [];
-    var listB = [];
-    var chosenListA = '';
-    var chosenListB = '';
-    var keyNameA = '';
-    var keyNameB = '';
-    var dropDownForLists = null;
-    var $leftDiv, $midDiv, $rightDiv, $canvas;
-    var canvasId = '';
-    var canvasCtx = null;
-    var canvasPtr = null;
-    var canvasWidth = 0;
-    var canvasHeight = 0;
-    var mandatoryErrorMessage = 'This field is mandatory';
-    var mandatoryTooltips = true;
-    var onError = false;
-    var className = 'fieldsLinker';
-    var linksByName = [];
-    var ListHeights1 = [];
-    var ListHeights2 = [];
-    var move = null;
-    var that = null;
-    var lineStyle = 'straight'; // straight or square-ends
-    var handleColor = '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'.split(',');
-    var lineColor = 'black';
-    var associationMode = 'oneToOne';
-    var isDisabled = false;
-    var globalAlpha = 1;
-    let mandatories = [];
-    let displayMode = 'original';
-    let whiteSpace ="nowrap";
-    let hideLink = false;
-    let isTouchScreen = is_touch_device();
-    let mobileClickIt = false;
+;(function($) {
+    $.fn.fieldsLinker = function (action, input) {
+        factory = this;
+        if (action == 'init') {
+            factory.work = new FieldsLinker(factory.selector);
+            if(fieldsLinkerMemory.length == 0){
+                fieldsLinkerMemory.push({"selector":factory.selector,"factory":factory});
+            }else{
+                let found = false;
+                fieldsLinkerMemory.forEach(function(x,i){
+                    if(x.selector == factory.selector){
+                        found = true;
+                        fieldsLinkerMemory[i].factory = factory;
+                    }
+                });
+                if(!found){
+                    fieldsLinkerMemory.push({"selector":factory.selector,"factory":factory});
+                }
+            }
+            factory.work.init(input)
+            factory.work.setGlobalRedraw();
+            factory.work.readUserPreferences();
+            factory.work.fillChosenLists(); 
+            factory.work.makeDropDownForLists(); 
+            factory.work.drawColumnsAtLoadTime();
+            factory.work.drawColumnsContentA();
+            factory.work.drawColumnsContentB();
+            factory.work.createCanvas();
+            factory.work.setListeners();
+            factory.work.changeSelects();
+            factory.work.manageExistingLinks();
+            factory.work.manageResize();
+            factory.work.draw();
+
+            return factory;
+
+        } else if (action == 'eraseLinks') {
+            factory.work.eraseLinks();
+            factory.work.draw();
+            return factory;
+
+        } else if (action === 'getLinks') {
+            return factory.work.getLinks();
+
+        } else if (action === 'changeParameters') {
+            factory.work.changeParameters(input);
+
+        } else if (action == 'disable') {
+            factory.work.enable(false);
+            return (factory);
+
+        } else if (action == 'enable') {
+            factory.work.enable(true);
+            return (factory);
+        } else {
+            console.log(factory.work.errMsg + 'no action parameter provided (param 1)');
+        }
+    };
+}(jQuery));
 
 
-    var draw = function () {
-        var tablesAB = chosenListA + '|' + chosenListB; // existingLinks
-        canvasCtx.globalAlpha = globalAlpha;
-        canvasCtx.beginPath();
-        canvasCtx.fillStyle = 'white';
-        canvasCtx.strokeStyle = lineColor;
-        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-        var links = linksByName.filter(function (x) {
+function FieldsLinker(selector){
+    this.selector = selector;
+    this.$root = $(this.selector);
+	this.FL_Factory_Lists = null;
+	this.FL_Original_Factory_Lists = null;
+    this.bootstrap_enabled = (typeof $().modal == 'function');
+    this.errMsg = 'fieldsLinker error : ';
+    this.data = {};
+    this.listsNr = 0;
+    this.listNames = [];
+    this.listA = [];
+    this.listB = [];
+    this.chosenListA = '';
+    this.chosenListB = '';
+    this.keyNameA = '';
+    this.keyNameB = '';
+    this.dropDownForLists = null;
+    this.$leftDiv;
+    this.$midDiv;
+    this.$rightDiv;
+    this.$canvas;
+    this.$main;
+    this.$btn;
+    this.$ulLeft;
+    this.$ulRight;
+    this.$filterDiv1;
+    this.$filterDiv2;
+    this.canvasId = '';
+    this.canvasCtx = null;
+    this.canvasWidth = 0;
+    this.canvasHeight = 0;
+    this.mandatoryErrorMessage = 'This field is mandatory';
+    this.mandatoryTooltips = true;
+    this.onError = false;
+    this.className = 'fieldsLinker';
+    this.linksByName = [];
+    this.ListHeights1 = [];
+    this.ListHeights2 = [];
+    this.move = null;
+    this.that = null;
+    this.lineStyle = 'straight'; // straight or square-ends
+    this.handleColor = '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'.split(',');
+    this.lineColor = 'black';
+    this.associationMode = 'oneToOne';
+    this.isDisabled = false;
+    this.globalAlpha = 1;
+    this.mandatories = [];
+    this.displayMode = 'original';
+    this.whiteSpace ="nowrap";
+    this.hideLink = false;
+    this.isTouchScreen = is_touch_device();
+    this.mobileClickIt = false;
+
+
+    this.draw = function () {
+        var self = this;
+        var tablesAB = self.chosenListA + '|' + self.chosenListB; // existingLinks
+        self.canvasCtx.globalAlpha = self.globalAlpha;
+        self.canvasCtx.beginPath();
+        self.canvasCtx.fillStyle = 'white';
+        self.canvasCtx.strokeStyle = self.lineColor;
+        self.canvasCtx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
+        var links = self.linksByName.filter(function (x) {
             return x.tables == tablesAB;
         });
         links.forEach(function (item, i) {
             var positionA = -1;
             var positionB = -1;
-            if (displayMode == 'original') {
-                positionA = listA.indexOf(item.from);
-                positionB = listB.indexOf(item.to);
-            } else if (displayMode == 'alternateView') {
-                listA.forEach(function (x, j) {
-                    if (x[keyNameA] == item.from) {
+            if (self.displayMode == 'original') {
+                positionA = self.listA.indexOf(item.from);
+                positionB = self.listB.indexOf(item.to);
+            } else if (self.displayMode == 'alternateView') {
+                self.listA.forEach(function (x, j) {
+                    if (x[self.keyNameA] == item.from) {
                         positionA = j;
                     }
                 });
-                listB.forEach(function (x, j) {
-                    if (x[keyNameB] == item.to) {
+                self.listB.forEach(function (x, j) {
+                    if (x[self.keyNameB] == item.to) {
                         positionB = j;
                     }
                 });
@@ -87,34 +160,34 @@ let FL_Original_Factory_Lists = null;
                 return;
             }
             var Ax = 0;
-            var Ay = ListHeights1[positionA];
-            var Bx = canvasWidth;
-            var By = ListHeights2[positionB];
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(Ax, Ay);
-            var handleCurrentColor = handleColor[i % handleColor.length];
-            if (lineStyle == 'square-ends' || lineStyle == 'square-ends-dotted') {
-                canvasCtx.fillStyle = handleCurrentColor;
-                canvasCtx.strokeStyle = handleCurrentColor;
-                canvasCtx.rect(Ax, Ay - 4, 8, 8);
-                canvasCtx.rect(Bx - 8, By - 4, 8, 8);
-                canvasCtx.fill();
-                canvasCtx.stroke();
-                canvasCtx.moveTo(Ax + 8, Ay);
-                canvasCtx.lineTo(Ax + 16, Ay);
-                canvasCtx.lineTo(Bx - 16, By);
-                canvasCtx.lineTo(Bx - 8, By);
-                canvasCtx.stroke();
+            var Ay = self.ListHeights1[positionA];
+            var Bx = self.canvasWidth;
+            var By = self.ListHeights2[positionB];
+            self.canvasCtx.beginPath();
+            self.canvasCtx.moveTo(Ax, Ay);
+            var handleCurrentColor = self.handleColor[i % self.handleColor.length];
+            if (self.lineStyle == 'square-ends' || self.lineStyle == 'square-ends-dotted') {
+                self.canvasCtx.fillStyle = handleCurrentColor;
+                self.canvasCtx.strokeStyle = handleCurrentColor;
+                self.canvasCtx.rect(Ax, Ay - 4, 8, 8);
+                self.canvasCtx.rect(Bx - 8, By - 4, 8, 8);
+                self.canvasCtx.fill();
+                self.canvasCtx.stroke();
+                self.canvasCtx.moveTo(Ax + 8, Ay);
+                self.canvasCtx.lineTo(Ax + 16, Ay);
+                self.canvasCtx.lineTo(Bx - 16, By);
+                self.canvasCtx.lineTo(Bx - 8, By);
+                self.canvasCtx.stroke();
             } else {
-                canvasCtx.strokeStyle = handleCurrentColor;
-                canvasCtx.lineTo(Bx, By);
-                canvasCtx.stroke();
+                self.canvasCtx.strokeStyle = handleCurrentColor;
+                self.canvasCtx.lineTo(Bx, By);
+                self.canvasCtx.stroke();
             }
-            canvasCtx.closePath();
-            canvasCtx.lineWidth = 1;
+            self.canvasCtx.closePath();
+            self.canvasCtx.lineWidth = 1;
         });
-    };
-    var makeLink = function (infos) {
+    }
+   this.makeLink = function (infos) {
         var tablesAB = chosenListA + '|' + chosenListB;
         var already = false;
         var test = linksByName.filter(function (x) {
@@ -146,8 +219,8 @@ let FL_Original_Factory_Lists = null;
             });
         }
         draw();
-    };
-    var eraseLinkA = function (nameA) {
+    }
+    this.eraseLinkA = function (nameA) {
         var tablesAB = chosenListA + '|' + chosenListB;
         for (var i = linksByName.length - 1; i >= 0; i--) {
             if (linksByName[i].tables == tablesAB && linksByName[i].from == nameA) {
@@ -159,8 +232,8 @@ let FL_Original_Factory_Lists = null;
             type: 'fieldLinkerUpdate',
             what: 'removeLink'
         });
-    };
-    var eraseLinkB = function (nameB) {
+    }
+    this.eraseLinkB = function (nameB) {
         var tablesAB = chosenListA + '|' + chosenListB;
         for (var i = linksByName.length - 1; i >= 0; i--) {
             if (linksByName[i].tables == tablesAB && linksByName[i].to == nameB) {
@@ -172,163 +245,179 @@ let FL_Original_Factory_Lists = null;
             type: 'fieldLinkerUpdate',
             what: 'removeLink'
         });
-    };
-    var readUserPreferences = function () {
-        if (data.options.className) {
-            className = data.options.className;
+    }
+    this.readUserPreferences = function () {
+        var self = this;
+        if (self.data.options.className) {
+            self.className = self.data.options.className;
         }
-        if(data.options.whiteSpace){
-            whiteSpace = data.options.whiteSpace;
+        if(self.data.options.whiteSpace){
+            self.whiteSpace = self.data.options.whiteSpace;
         }
-        if (data.options.lineStyle) {
-            if (data.options.lineStyle == 'square-ends' || data.options.lineStyle == 'square-ends-dotted')
-                lineStyle = data.options.lineStyle;
+        if (self.data.options.lineStyle) {
+            if (self.data.options.lineStyle == 'square-ends' || self.data.options.lineStyle == 'square-ends-dotted')
+            self.lineStyle = self.data.options.lineStyle;
         }
-        if (data.options.lineColor) {
-            lineColor = data.options.lineColor;
+        if (self.data.options.lineColor) {
+            self.lineColor = self.data.options.lineColor;
         }
-        if (data.options.displayMode) {
-            displayMode = data.options.displayMode;
-            if (displayMode != 'alternateView') {
-                displayMode = 'original';
+        if (self.data.options.displayMode) {
+            self.displayMode = self.data.options.displayMode;
+            if (self.displayMode != 'alternateView') {
+                self.displayMode = 'original';
             }
         }
-        if (displayMode == 'alternateView') {
-            if (data.options.displayModeHideKey) {
-                hideLink = data.options.displayModeHideKey;
+        if (self.displayMode == 'alternateView') {
+            if (self.data.options.displayModeHideKey) {
+                self.hideLink = self.data.options.displayModeHideKey;
             }
         }
-        if (data.options.handleColor) {
-            handleColor = data.options.handleColor.split(',');
+        if (self.data.options.handleColor) {
+            self.handleColor = self.data.options.handleColor.split(',');
         }
-        if (data.options.associationMode) {
-            associationMode = data.options.associationMode;
+        if (self.data.options.associationMode) {
+            self.associationMode = self.data.options.associationMode;
         }
-        if (data.options.mobileClickIt != undefined) {
-            mobileClickIt = data.options.mobileClickIt;
+        if (self.data.options.mobileClickIt != undefined) {
+            self.mobileClickIt = self.data.options.mobileClickIt;
         }
-        if(isTouchScreen){
-            mobileClickIt = true;
+        if(self.isTouchScreen){
+            self.mobileClickIt = true;
         }
-    };
-    var fillChosenLists = function () {
-        listNames = [];
-        listA = [];
-        listB = [];
-        if (chosenListA == '' || chosenListB == '') {
-            chosenListA = data.Lists[0].name;
-            chosenListB = data.Lists[1].name;
+    }
+    this.fillChosenLists = function () {
+        var self = this;
+        self.listNames = [];
+        self.listA = [];
+        self.listB = [];
+        if (self.chosenListA == '' || self.chosenListB == '') {
+            self.chosenListA = self.data.Lists[0].name;
+            self.chosenListB = self.data.Lists[1].name;
         }
-        keyNameA = data.Lists[0].keyName || '';
-        keyNameB = data.Lists[1].keyName || '';
+        self.keyNameA = self.data.Lists[0].keyName || '';
+        self.keyNameB = self.data.Lists[1].keyName || '';
 
-        data.Lists.forEach(function (x) {
-            listNames.push(x.name);
-            if (x.name == chosenListA) {
+        self.data.Lists.forEach(function (x) {
+            self.listNames.push(x.name);
+            if (x.name == self.chosenListA) {
                 x.list.forEach(function (y) {
-                    listA.push(y);
+                    self.listA.push(y);
                 });
             }
-            if (x.name == chosenListB) {
+            if (x.name == self.chosenListB) {
                 if (x.mandatories != undefined) {
-                    mandatories = x.mandatories;
+                    self.mandatories = x.mandatories;
                 }
                 x.list.forEach(function (y) {
-                    listB.push(y);
+                    self.listB.push(y);
                 });
             }
         });
-    };
-    var makeDropDownForLists = function () {
-        dropDownForLists = $('<select></select>');
-        dropDownForLists
+    }
+    this.makeDropDownForLists = function () {
+        var self = this;
+        self.dropDownForLists = $('<select></select>');
+        self.dropDownForLists
             .css('width', '100%');
-        listNames.forEach(function (x) {
+            self.listNames.forEach(function (x) {
             var $option = $('<option></option>');
             $option
                 .val(x)
                 .text(x)
-                .appendTo(dropDownForLists);
+                .appendTo(self.dropDownForLists);
         });
-    };
-    var drawColumnsAtLoadTime = function () {
-        $(factory).html('');
-        var $main = $('<div></div>');
-        $main
-            .appendTo($(factory))
-            .addClass('FL-main ' + className)
+    }
+    this.drawColumnsAtLoadTime = function () {
+        var self = this;
+        self.$root.html('');
+        self.$main = $('<div></div>');
+        self.$main
+            .appendTo(self.$root)
+            .addClass('FL-main ' + self.className)
             .css({
                 'position': 'relative',
                 'width': '100%',
                 'text-align': 'left'
             });
 
-        $leftDiv = $('<div></div>');
-        $leftDiv
-            .appendTo($main)
+        self.$leftDiv = $('<div></div>');
+        self.$leftDiv
+            .appendTo(self.$main)
             .addClass('FL-left')
             .css({
                 'float': 'left',
                 'width': '40%',
                 'display': 'inline-block',
                 'text-align': 'left',
-                'white-space': whiteSpace
+                'white-space': self.whiteSpace
             })
-            .append(dropDownForLists.clone());
-        $leftDiv.find('select')
+            .append(self.dropDownForLists.clone());
+
+        self.$leftDiv.find('select')
             .attr('id', 'select1')
-            .val(chosenListA)
+            .val(self.chosenListA)
             .on('change', function () {
-                chosenListA = $(this).val();
-                fillChosenLists();
+                self.chosenListA = $(this).val();
+                self.fillChosenLists();
             });
-        $midDiv = $('<div></div>');
-        $midDiv
-            .appendTo($main)
+
+        self.$ulLeft = $('<ul></ul>');
+        self.$ulLeft
+            .appendTo(self.$leftDiv)
+            .css({
+                'text-align': 'left',
+                'list-style': 'none'
+            });
+
+        self.$midDiv = $('<div></div>');
+        self.$midDiv
+            .appendTo(self.$main)
             .addClass('FL-mid')
             .css({
                 'display': 'inline-block',
                 'width': '20%'
             });
-        $rightDiv = $('<div></div>');
-        $rightDiv
-            .appendTo($main)
+
+        self.$rightDiv = $('<div></div>');
+        self.$rightDiv
+            .appendTo(self.$main)
             .addClass('FL-right')
             .css({
                 'float': 'right',
                 'width': '40%',
                 'display': 'inline-block',
                 'text-align': 'left',
-                'white-space': whiteSpace
+                'white-space': self.whiteSpace
             })
-            .append(dropDownForLists.clone());
-		if (data.options.buttonErase) {
-            var $btn = $('<button></button>');
-            $btn
-                .appendTo($(factory).find('.FL-main'))
+            .append(self.dropDownForLists.clone());
+
+		if (self.data.options.buttonErase) {
+            self.$btn = $('<button></button>');
+            self.$btn
+                .appendTo(self.$root.find('.FL-main'))
                 .attr('type', 'button')
                 .addClass('btn btn-default btn-sm eraseLink')
 				.attr("style","position:absolute;top:-6px;right:0;opacity:0.9;")
-                .html(data.options.buttonErase);
+                .html(self.data.options.buttonErase);
         }
-        $rightDiv.find('select')
+
+        self.$rightDiv.find('select')
             .attr('id', 'select2')
-            .val(chosenListB)
+            .val(self.chosenListB)
             .on('change', function () {
-                chosenListB = $(this).val();
-                fillChosenLists();
+                self.chosenListB = $(this).val();
+                self.fillChosenLists();
             });
-        var $ul = $('<ul></ul>');
-        $ul
-            .appendTo($leftDiv)
+
+        self.$ulRight = $('<ul></ul>');
+        self.$ulRight
+            .appendTo(self.$leftDiv)
             .css({
                 'text-align': 'left',
                 'list-style': 'none'
             });
-
-    };
-
-    var createFilterDiv = function (listIndex) {
+    }
+    this.createFilterDiv = function (listIndex) {
         if ($('.FL-filter-' + listIndex).length > 0) {
             return false;
         }
@@ -348,8 +437,8 @@ let FL_Original_Factory_Lists = null;
             $(factory).fieldsLinker('init', FL_Factory_Lists);
         });
         return divFilter;
-    };
-    var filterList = function (list, filter, keysFilter) {
+    }
+    this.filterList = function (list, filter, keysFilter) {
         // en créer une nouvelle, pas de souci de ref
         let re = RegExp(filter, 'i');
         var newList = [];
@@ -364,36 +453,37 @@ let FL_Original_Factory_Lists = null;
             }
         });
         return newList;
-    };
-    var computeListHeight = function (li) {
+    }
+    this.computeListHeight = function (li) {
         // outerHeight(true) adds margins too, full step is simply full outerHeight / 2 between li siblings
         var step = Math.ceil($(li).outerHeight(true) / 2);
         return  Math.floor($(li).position().top + step);
-    };
-    var drawColumnsContentA = function () {
-        if (data.Lists[0].filter) {
-            var filterDiv = createFilterDiv(0);
-            if (filterDiv != false) {
-                filterDiv.appendTo($leftDiv);
+    }
+    this.drawColumnsContentA = function () {
+        var self = this;
+        if (self.data.Lists[0].filter) {
+            $filterDiv1 = createFilterDiv(0);
+            if ($filterDiv1 != false) {
+                $filterDiv1.appendTo(self.$leftDiv);
             }
         }
-        var $ulA = $('.FL-left ul');
-        if ($ulA.length == 1) {
-            $ulA.empty();
+        if (self.$ulLeft.length == 1) {
+            self.$ulLeft.empty();
         } else {
-            $ulA = $('<ul></ul>');
+            self.$ulLeft = $('<ul></ul>');
+            self.$ulLeft.appendTo(self.$leftDiv)
         }
-        $ulA
-            .appendTo($leftDiv)
-            .attr('data-col', chosenListA)
+
+        self.$ulLeft
+            .attr('data-col', self.chosenListA)
             .css({
                 'text-align': 'left',
                 'list-style': 'none'
             });
 
-        listA.forEach(function (x, i) {
+        self.listA.forEach(function (x, i) {
             let nrItems = Object.keys(x).length;
-            if (hideLink) {
+            if (self.hideLink) {
                 nrItems--;
             }
             if (nrItems < 0) {
@@ -403,12 +493,12 @@ let FL_Original_Factory_Lists = null;
             var $li = $('<li></li>');
             let item = x;
             let id = x;
-            if (displayMode == 'alternateView') {
+            if (self.displayMode == 'alternateView') {
                 item = '<table style=\'width:100%;\'><tbody><tr>';
                 for (key in x) {
-                    if (key == keyNameA) {
+                    if (key == self.keyNameA) {
                         id = x[key];
-                        if (!hideLink) {
+                        if (!self.hideLink) {
                             item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
                         }
                     } else {
@@ -418,7 +508,7 @@ let FL_Original_Factory_Lists = null;
                 item += '</tr></tbody></table>';
             }
             $li
-                .appendTo($ulA)
+                .appendTo(self.$ulLeft)
                 .attr('data-offset', i)
                 .attr('data-name', id)
                 .css({
@@ -462,35 +552,35 @@ let FL_Original_Factory_Lists = null;
                 });
         });
         // Computing the vertical offset of the middle of each cell.
-        ListHeights1 = [];
+        self.ListHeights1 = [];
 
-        $(factory).find('.FL-main .FL-left li').each(function (i, li) {
-            var val = computeListHeight(li);
-            ListHeights1.push(val);
+        $(self.$ulLeft).find('li').each(function (i, li) {
+            var val = self.computeListHeight(li);
+            self.ListHeights1.push(val);
         });
 
-        if (!mobileClickIt) {
-            $(factory).find('.FL-main .FL-left li').off('mousedown').on('mousedown', function (e) {
+        if (!self.mobileClickIt) {
+            $(self.$ulLeft).find('li').off('mousedown').on('mousedown', function (e) {
                 // we make a move object to keep track of the origine and also remember that we are starting a mouse drag (mouse is down)
-                if (isDisabled) return;
-                move = {};
-                move.offsetA = $(this).data('offset');
-                move.nameA = $(this).data('name');
-                move.offsetB = -1;
-                move.nameB = -1;
+                if (self.isDisabled) return;
+                self.move = {};
+                self.move.offsetA = $(this).data('offset');
+                self.move.nameA = $(this).data('name');
+                self.move.offsetB = -1;
+                self.move.nameB = -1;
             });
         }
 
-        if (isTouchScreen && !mobileClickIt) {
+        if (self.isTouchScreen && !self.mobileClickIt) {
             // On mousedown in left List :
-            $(factory).find('.link').off('touchstart').on('touchstart', function (e) {
+            $(self.$root).find('.link').off('touchstart').on('touchstart', function (e) {
 
-                if (isDisabled) return;
-                move = {};
-                move.offsetA = $(this).parent().data('offset');
-                move.nameA = $(this).parent().data('name');
-                move.offsetB = -1;
-                move.nameB = -1;
+                if (self.isDisabled) return;
+                self.move = {};
+                self.move.offsetA = $(this).parent().data('offset');
+                self.move.nameA = $(this).parent().data('name');
+                self.move.offsetB = -1;
+                self.move.nameB = -1;
 
                 var originalEvent = e.originalEvent;
                 if (originalEvent != null && originalEvent.touches != undefined) {
@@ -500,12 +590,12 @@ let FL_Original_Factory_Lists = null;
                             clientX: touch.clientX,
                             clientY: touch.clientY
                         });
-                        drawImmediate(mouseEvent);
+                        self.drawImmediate(mouseEvent);
                     }
                 }
             });
 
-            $(factory).find('.link').off('touchmove').on('touchmove', function (e) {
+            $(self.$root).find('.link').off('touchmove').on('touchmove', function (e) {
                 var originalEvent = e.originalEvent;
                 if (originalEvent != null && originalEvent.touches != undefined) {
                     var touch = originalEvent.touches[0];
@@ -514,15 +604,15 @@ let FL_Original_Factory_Lists = null;
                         clientY: touch.clientY
                     });
 
-                    if (move != null) {
-                        drawImmediate(mouseEvent);
+                    if (self.move != null) {
+                        self.drawImmediate(mouseEvent);
                     }
 
                 }
             });
 
-            $(factory).find('.link').off('touchend').on('touchend', function (e) {
-                if (isDisabled) return;
+            $(self.$root).find('.link').off('touchend').on('touchend', function (e) {
+                if (self.isDisabled) return;
 
                 var originalEvent = e.originalEvent;
                 if (originalEvent != null && originalEvent.touches != undefined) {
@@ -531,93 +621,94 @@ let FL_Original_Factory_Lists = null;
                         x: touch.clientX,
                         y: touch.clientY
                     };
-                    if (move != null) {
+                    if (self.move != null) {
                         let found = false;
-                        $(factory).find('.FL-main .FL-right li').each(function (i) {
+                        $(self.$ulRight).find('li').each(function (i) {
                             if (!found) {
                                 var rect = this.getBoundingClientRect();
                                 //left, top, right, bottom, width, height
                                 if (mousePosition.x >= rect.left && mousePosition.x <= rect.right && mousePosition.y >= rect.top && mousePosition.y <= rect.bottom) {
-                                    if (associationMode == 'oneToOne') {
-                                        eraseLinkB($(this).data('name')); // we erase an existing link if any
+                                    if (self.associationMode == 'oneToOne') {
+                                        self.eraseLinkB($(this).data('name')); // we erase an existing link if any
                                     }
-                                    move.offsetB = $(this).data('offset');
-                                    move.nameB = $(this).data('name');
+                                    self.move.offsetB = $(this).data('offset');
+                                    self.move.nameB = $(this).data('name');
                                     var infos = JSON.parse(JSON.stringify(move));
-                                    move = null;
-                                    makeLink(infos);
+                                    self.move = null;
+                                    self.makeLink(infos);
                                     found = true;
                                 }
                             }
                         });
                         if (!found) {
-                            draw();
+                            self.draw();
                         }
                     }
                 }
             });
         }
 
-        if (!mobileClickIt) {
-            $(factory).find('.FL-main .FL-left li').off('mouseup').on('mouseup', function (e) {
-                if (isDisabled) return;
+        if (!self.mobileClickIt) {
+            $(self.$ulLeft).find('li').off('mouseup').on('mouseup', function (e) {
+                if (self.isDisabled) return;
                 // We do a mouse up on the left side : the drag is canceled
-                move = null;
+                self.move = null;
             });
 
-            $(factory).find('.FL-main .FL-left li').off('click').on('click', function (e) {
-                if (isDisabled) return;
-                eraseLinkA($(this).data('name'));
-                draw();
+            $(self.$ulLeft).find('li').off('click').on('click', function (e) {
+                if (self.isDisabled) return;
+                self.eraseLinkA($(this).data('name'));
+                self.draw();
             });
         }
 
-        if (mobileClickIt) {
-            $(factory).find('.FL-left li').off('click').on('click', function (e) {
-                if (isDisabled) return;
-                const el = $(this);
-                $('.selected').removeClass('selected');
+        if (self.mobileClickIt) {
+            $(self.$ulLeft).find('li').off('click').on('click', function (e) {
+                if (self.isDisabled) return;
+                let el = $(this);
+                $(self.$root).find('.selected').removeClass('selected');
                 el.addClass('selected');                
-                move = {};
-                move.offsetA = el.data('offset');
-                move.nameA = el.data('name');
-                move.offsetB = -1;
-                move.nameB = -1;
+                self.move = {};
+                self.move.offsetA = el.data('offset');
+                self.move.nameA = el.data('name');
+                self.move.offsetB = -1;
+                self.move.nameB = -1;
             });
         }
 
-        $(factory).find('.unlink').off('click').on('click', function (e) {
-            if (isDisabled) return;
-            eraseLinkA($(this).data('name'));
-            draw();
+        $(self.$root).find('.unlink').off('click').on('click', function (e) {
+            if (self.isDisabled) return;
+            self.eraseLinkA($(this).data('name'));
+            self.draw();
         });
-    };
-    var drawColumnsContentB = function () {
-        if (data.Lists[1].filter) {
-            var filterDiv = createFilterDiv(1);
-            if (filterDiv != false) {
-                filterDiv.appendTo($rightDiv);
+    }
+   this.drawColumnsContentB = function () {
+       var self = this;
+        if (self.data.Lists[1].filter) {
+            $filterDiv2 = createFilterDiv(1);
+            if ($filterDiv2 != false) {
+                $filterDiv2.appendTo(self.$rightDiv);
             }
         }
 
-        var $ulB = $('.FL-right ul');
-        if ($ulB.length == 1) {
-            $ulB.empty();
+        if (self.$ulRight.length == 1) {
+            self.$ulRight.empty();
         } else {
-            $ulB = $('<ul></ul>');
+            self.$ulRight = $('<ul></ul>');
+            self.$ulRight.appendTo(self.$rightDiv)
         }
-        $ulB
-            .appendTo($rightDiv)
-            .attr('data-col', chosenListB)
+        self.$ulRight
+            .appendTo(self.$rightDiv)
+            .attr('data-col', self.chosenListB)
             .css({
                 'text-align': 'left',
                 'list-style': 'none'
             });
 
-        listB.forEach(function (x, i) {
+        self.listB.forEach(function (x, i) {
             let item = x;
             let id = x;
-            if (displayMode == 'alternateView') {
+            if (self.displayMode == 'alternateView') {
                 let nrItems = Object.keys(x).length;
                 if (hideLink) {
                     nrItems--;
@@ -630,9 +721,9 @@ let FL_Original_Factory_Lists = null;
                 item = '<table style=\'width:100%;\'><tbody><tr>';
                 let sep = '';
                 for (key in x) {
-                    if (key == keyNameB) {
+                    if (key == self.keyNameB) {
                         id = x[key];
-                        if (!hideLink) {
+                        if (!self.hideLink) {
                             item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
                         }
                     } else {
@@ -641,10 +732,10 @@ let FL_Original_Factory_Lists = null;
                 }
                 item += '</tr></tbody></table>';
             }
-            var isMandatory = (mandatories.indexOf(x) != -1);
+            var isMandatory = (self.mandatories.indexOf(x) != -1);
             var $li = $('<li></li>');
             $li
-                .appendTo($ulB)
+                .appendTo(self.$ulRight)
                 .attr('data-offset', i)
                 .attr('data-name', id)
                 .attr('data-mandatory', isMandatory)
@@ -660,105 +751,103 @@ let FL_Original_Factory_Lists = null;
                     'width': '80%'
                 })
                 .html(item);
-            if (isMandatory && mandatoryTooltips) {
+            if (isMandatory && self.mandatoryTooltips) {
                 $li
                     .attr('data-placement', 'top')
-                    .attr('title', mandatoryErrorMessage);
-                if (bootstrap_enabled)
+                    .attr('title', self.mandatoryErrorMessage);
+                if (self.bootstrap_enabled)
                     $li.tooltip();
             }
         });
         // Computing the vertical offset of the middle of each cell.
-        ListHeights2 = [];
+        self.ListHeights2 = [];
 
-        $(factory).find('.FL-main .FL-right li').each(function (i, li) {
-            var val = computeListHeight(li);
-            ListHeights2.push(val);
-
+        $(self.$ulRight).find('li').each(function (i, li) {
+            var val = self.computeListHeight(li);
+            self.ListHeights2.push(val);
         });
         // Mouse up on the right side
-        $(factory).find('.FL-main .FL-right li').off('mouseup').on('mouseup', function (e) {
-            if (isDisabled) return;
-            if (move != null) { // no drag
-                if (associationMode == 'oneToOne') {
-                    eraseLinkB($(this).data('name')); // we erase an existing link if any
+        $(self.$ulRight).find('li').off('mouseup').on('mouseup', function (e) {
+            if (self.isDisabled) return;
+            if (self.move != null) { // no drag
+                if (self.associationMode == 'oneToOne') {
+                    self.eraseLinkB($(this).data('name')); // we erase an existing link if any
                 }
-                move.offsetB = $(this).data('offset');
-                move.nameB = $(this).data('name');
+                self.move.offsetB = $(this).data('offset');
+                self.move.nameB = $(this).data('name');
                 var infos = JSON.parse(JSON.stringify(move));
-                move = null;
-                makeLink(infos);
-            }
-        });
-        $(factory).find('.FL-main .FL-right li').off('dblclick').on('dblclick', function (e) {
-            if (isDisabled) return;
-            eraseLinkB($(this).data('name')); // we erase an existing link if any
-            draw();
-        });
-        // mousemove over a right cell
-        $(factory).find('.FL-main .FL-right li').off('mousemove').on('mousemove', function (e) {
-            if (isDisabled) return;
-            if (move != null) { // drag occuring
-                var _from = move.offsetA;
-                var _To = $(this).data('offset');
-                var Ax = 0;
-                var Ay = ListHeights1[_from];
-                var Bx = canvasWidth;
-                var By = ListHeights2[_To];
-                draw();
-                canvasCtx.beginPath();
-                var color = handleColor[_from % handleColor.length];
-                canvasCtx.fillStyle = 'white';
-                canvasCtx.strokeStyle = color;
-                canvasCtx.moveTo(Ax, Ay);
-                canvasCtx.lineTo(Bx, By);
-                canvasCtx.stroke();
+                self.move = null;
+                self.makeLink(infos);
             }
         });
 
-        if (mobileClickIt) {
-            $(factory).find('.FL-right li').off('click').on('click', function (e) {
-                $('.selected').removeClass('selected');
-                if (isDisabled || move === null) return;
-                move.offsetB = $(this).data('offset');
-                move.nameB = $(this).data('name');
+        $(self.$ulRight).find('li').off('dblclick').on('dblclick', function (e) {
+            if (self.isDisabled) return;
+            self.eraseLinkB($(this).data('name')); // we erase an existing link if any
+            self.draw();
+        });
+        // mousemove over a right cell
+        $(self.$ulRight).find('li').off('mousemove').on('mousemove', function (e) {
+            if (self.isDisabled) return;
+            if (self.move != null) { // drag occuring
+                var _from = self.move.offsetA;
+                var _To = $(this).data('offset');
+                var Ax = 0;
+                var Ay = self.ListHeights1[_from];
+                var Bx = self.canvasWidth;
+                var By = self.ListHeights2[_To];
+                self.draw();
+                self.canvasCtx.beginPath();
+                var color = self.handleColor[_from % self.handleColor.length];
+                self.canvasCtx.fillStyle = 'white';
+                self.canvasCtx.strokeStyle = color;
+                self.canvasCtx.moveTo(Ax, Ay);
+                self.canvasCtx.lineTo(Bx, By);
+                self.canvasCtx.stroke();
+            }
+        });
+
+        if (self.mobileClickIt) {
+            $(self.$ulRight).find('li').off('click').on('click', function (e) {
+                $(self.$root).find('.selected').removeClass('selected');
+                if (self.isDisabled || self.move === null) return;
+                self.move.offsetB = $(this).data('offset');
+                self.move.nameB = $(this).data('name');
                 var infos = JSON.parse(JSON.stringify(move));
-                move = null;
-                makeLink(infos);
+                self.move = null;
+                self.makeLink(infos);
             });
         }
-    };
-    var createCanvas = function () {
-        canvasId = 'cnv_' + Date.now();
-        var w = $midDiv.width();
-        var h2 = $rightDiv.height();
-        var h1 = $leftDiv.height();
+    }
+    this.createCanvas = function () {
+        var self = this;
+        self.canvasId = 'cnv_' + Date.now();
+        var w = self.$midDiv.width();
+        var h2 = self.$rightDiv.height();
+        var h1 = self.$leftDiv.height();
         var h = h1 >= h2 ? h1 : h2;
-        $canvas = $('<canvas></canvas>');
-        $canvas
-            .appendTo($midDiv)
-            .attr('id', canvasId)
+        self.$canvas = $('<canvas></canvas>');
+        self.$canvas
+            .appendTo(self.$midDiv)
+            .attr('id', self.canvasId)
             .css({
                 'width': w + 'px',
                 'height': h + 'px'
             });
-        canvasWidth = w;
-        canvasHeight = h;
-        canvasPtr = document.getElementById(canvasId);
-        canvasPtr.width = canvasWidth;
-        canvasPtr.height = canvasHeight;
-        canvasCtx = canvasPtr.getContext('2d');
-    };
-
-    var getTouchPos = function (e) {
-        var rect = canvasPtr.getBoundingClientRect();
+        self.canvasWidth = w;
+        self.canvasHeight = h;
+        self.$canvas.width = self.canvasWidth;
+        self.$canvas.height = self.canvasHeight;
+        self.canvasCtx = document.getElementById(self.canvasId).getContext('2d');
+    }
+    this.getTouchPos = function (e) {
+        var rect = self.$canvas.getBoundingClientRect();
         return {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
-    };
-
-    var drawImmediate = function (e) {
+    }
+    this.drawImmediate = function (e) {
         canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
         // we redraw all the existing links
         draw();
@@ -780,305 +869,313 @@ let FL_Original_Factory_Lists = null;
         canvasCtx.lineTo(Bx, By);
         canvasCtx.stroke();
 
-    };
-    var setListeners = function () {
-        if (data.options.buttonErase) {
-            $(factory).find('.FL-main .eraseLink').on('click', function (e) {
-                if (isDisabled) return;
-                linksByName.length = 0;
-                draw();
-                $('body').trigger({
+    }
+    this.setListeners = function () {
+        var self = this;
+        if (self.data.options.buttonErase) {
+            $(self.$root).find('.FL-main .eraseLink').on('click', function (e) {
+                if (self.isDisabled) return;
+                self.linksByName.length = 0;
+                self.draw();
+                $(self.selector).trigger({
                     type: 'fieldLinkerUpdate',
                     what: 'removeLink'
                 });
             });
         }
         // mousemove over the canvas
-        $(factory).find('canvas').on('mousemove', function (e) {
-            if (isDisabled) return;
-            if (move != null) {
-                drawImmediate(e);
+        $(self.$canvas).on('mousemove', function (e) {
+            if (self.isDisabled) return;
+            if (self.move != null) {
+                self.drawImmediate(e);
             }
         });
-        $(factory).find('.FL-main').on('mouseup', function (e) {
-            if (isDisabled) return;
-            if (move != null) {
-                move = null;
-                draw();
+        $(self.$main).on('mouseup', function (e) {
+            if (self.isDisabled) return;
+            if (self.move != null) {
+                self.move = null;
+                self.draw();
             }
         });
-        $('.FL-left select').on('change', function (e) {
-            if (isDisabled) return;
-            chosenListA = $(this).val();
-            $('.FL-right select option').each(function () {
+        // this is a remnant of LinksMaker : could handle more than 2 columns
+        // this won't change unluss we trigger it
+        $(self.$leftDiv).find('select').on('change', function (e) {
+            if (self.isDisabled) return;
+            self.chosenListA = $(this).val();
+            $(self.$rightDiv).find('select option').each(function () {
                 $(this)
-                    .attr('disabled', $(this).val() == chosenListA);
+                    .attr('disabled', $(this).val() == self.chosenListA);
             });
-            drawColumnsContentA();
-            draw();
+            self.drawColumnsContentA();
+            self.draw();
         });
-        $('.FL-right select').on('change', function (e) {
-            if (isDisabled) return;
-            chosenListB = $(this).val();
-            $('.FL-left select option').each(function () {
+
+        $(self.$rightDiv).find('select').on('change', function (e) {
+            if (self.isDisabled) return;
+            self.chosenListB = $(this).val();
+            $(self.$leftDiv).find('select option').each(function () {
                 $(this)
-                    .attr('disabled', $(this).val() == chosenListB);
+                    .attr('disabled', $(this).val() == this.chosenListB);
             });
-            drawColumnsContentB();
-            draw();
+            self.drawColumnsContentB();
+            self.draw();
         });
-    };
-    $.fn.fieldsLinker = function (action, input) {
-        factory = this;
-        if (action == 'init') {
-            $('body').on('LM_Message_Redraw', function () {
-                mandatories = [];
-                move = null;
-                listA = [];
-                listB = [];
-                FL_Factory_Lists.Lists.forEach(function (x) {
-                    if (x.name == chosenListA) {
-                        let dict = {};
-                        x.list.forEach(function (y) {
-                            if (!dict[y]) {
-                                dict[y] = 1;
-                            } else {
-                                dict[y] + 1;
-                                y += '(' + dict[y] + ')';
-                            }
-                        });
-                        listA = x.list;
-                    }
-                    if (x.name == chosenListB) {
-                        listB = x.list;
-                        if (x.mandatories != undefined) {
-                            mandatories = x.mandatories;
-                        }
-                    }
-                });
-                drawColumnsContentA();
-                drawColumnsContentB();
-                draw();
-            });
-            if (!input) {
-                onError = true;
-                console.log(errMsg + 'no input parameter provided (param 2)');
-                return;
-            }
-            data = JSON.parse(JSON.stringify(input));
-            FL_Factory_Lists = data;
-            if (FL_Original_Factory_Lists == null) {
-                FL_Original_Factory_Lists = JSON.parse(JSON.stringify(data));
-            }
-            if (!data.Lists || data.Lists.length < 2) {
-                onError = true;
-                console.log(errMsg + 'provide at least 2 lists');
-                return;
-            }
-
-            readUserPreferences();
-
-            listsNr = data.Lists.length;
-
-            if (displayMode == 'original') {
-                for (let i = 0; i < listsNr; i++) {
+    }
+    this.setGlobalRedraw = function(){
+        var self = this;
+        $(self.selector).on('LM_Message_Redraw', function () {
+            self.mandatories = [];
+            self.move = null;
+            self.listA = [];
+            self.listB = [];
+            self.FL_Factory_Lists.Lists.forEach(function (x) {
+                if (x.name ==  self.chosenListA) {
                     let dict = {};
-                    for (let j = 0; j < data.Lists[i].list.length; j++) {
-                        let val = data.Lists[i].list[j];
-                        if (!dict[val]) {
-                            dict[val] = 1;
+                    x.list.forEach(function (y) {
+                        if (!dict[y]) {
+                            dict[y] = 1;
                         } else {
-                            dict[val] += 1;
-                            data.Lists[i].list[j] += '(' + dict[val] + ')';
+                            dict[y] + 1;
+                            y += '(' + dict[y] + ')';
                         }
-                    }
-                }
-            } else if (displayMode == 'alternateView') {
-                if (!data.Lists[0].keyName || !data.Lists[1].keyName) {
-                    onError = true;
-                    console.log(errMsg + 'alternateView mode : provide keyName properties');
-                    return;
-                }
-            }
-            fillChosenLists();
-            makeDropDownForLists();
-            drawColumnsAtLoadTime();
-            drawColumnsContentA();
-            drawColumnsContentB();
-            createCanvas();
-            setListeners();
-            $('.FL-left select')
-                .trigger('change')
-                .css('border', 'none')
-                .css('appearance', 'none')
-                .attr('disabled', 'true');
-            $('.FL-right select')
-                .trigger('change')
-                .css('border', 'none')
-                .css('appearance', 'none')
-                .attr('disabled', 'true');
-            if (data.existingLinks) {
-                linksByName = data.existingLinks;
-                var tablesAB = chosenListA + '|' + chosenListB;
-                linksByName.forEach(function (x) {
-                    x.tables = tablesAB;
-                });
-            }
-            $(window).resize(function () {
-                canvasWidth = $(factory).find('.FL-main .FL-mid').width();
-                canvasPtr.width = canvasWidth;
-                $('#' + canvasId).css('width', canvasWidth + 'px');
-                draw();
-            });
-            draw();
-            return (factory);
-        } else if (action == 'eraseLinks') {
-            linksByName.length = 0;
-            draw();
-        } else if (action === 'getLinks') {
-            if (!onError) {
-                var isMandatoryError = false;
-                let links = null;
-                var errorMessage = mandatoryErrorMessage + ' : ';
-                var fieldInErrorName = '';
-                mandatories.forEach(function (m, i) {
-                    if (!isMandatoryError) {
-                        var match = linksByName.filter(function (link) {
-                            return link.to == m;
-                        });
-                        if (match.length == 0) {
-                            isMandatoryError = true;
-                            fieldInErrorName = m;
-                        }
-                    }
-                });
-                if (isMandatoryError) {
-                    return {
-                        'error': true,
-                        'errorMessage': errorMessage + fieldInErrorName,
-                        'links': []
-                    };
-                } else {
-                    links = [];
-                    linksByName.forEach(function (x) {
-                        links.push({
-                            from: x.from,
-                            to: x.to
-                        });
                     });
-                    return {
-                        'error': false,
-                        'errorMessage': '',
-                        'links': links
-                    };
+                    self.listA = x.list;
                 }
-            } else {
-                return [];
-            }
-        } else if (action === 'changeParameters') {
-            if (!onError) {
-                if (input) {
-                    var options = JSON.parse(JSON.stringify(input));
-                    if (options.className) {
-                        className = options.className;
-                    }
-                    if(options.whiteSpace){
-                        
-                        whiteSpace = options.whiteSpace;
-                        
-                        $(".FL-left").css("white-space",whiteSpace);
-                        $(".FL-right").css("white-space",whiteSpace);
-                        
-                        ListHeights2 = [];
-                        
-                        $(factory).find('.FL-main .FL-right li').each(function (i, li) {
-                            var val = computeListHeight(li);
-                            ListHeights2.push(val);
-
-                        });
-                        
-                        ListHeights1 = [];
-
-                        $(factory).find('.FL-main .FL-left li').each(function (i, li) {
-                            var val = computeListHeight(li);
-                            ListHeights1.push(val);
-                        });
-                        draw();
-                    }
-                    if (options.lineStyle) {
-                        lineStyle = options.lineStyle;
-                        draw();
-                    }
-                    if (options.lineColor) {
-                        lineColor = options.lineColor;
-                    }
-                    if (options.handleColor) {
-                        handleColor = options.handleColor;
-                    }
-                    if (options.associationMode) {
-                        let unicityTokenA = '';
-                        let unicityTokenB = '';
-                        let formerAssociation = associationMode;
-                        associationMode = options.associationMode;
-                        if (associationMode == 'oneToOne' && formerAssociation == 'manyToMany') {
-                            let unicityDict = {};
-                            for (var i = linksByName.length - 1; i >= 0; i--) {
-                                unicityTokenA = linksByName[i].tables + '_A_' + linksByName[i]['from'];
-                                unicityTokenB = linksByName[i].tables + '_B_' + linksByName[i]['to'];
-                                let doDelete = false;
-                                if (!unicityDict[unicityTokenA]) {
-                                    unicityDict[unicityTokenA] = true;
-                                } else {
-                                    doDelete = true;
-                                }
-                                if (!unicityDict[unicityTokenB]) {
-                                    unicityDict[unicityTokenB] = true;
-                                } else {
-                                    doDelete = true;
-                                }
-                                if (doDelete) {
-                                    linksByName.splice(i, 1);
-                                }
-                            }
-                        }
+                if (x.name == chosenListB) {
+                    self.listB = x.list;
+                    if (x.mandatories != undefined) {
+                        self.mandatories = x.mandatories;
                     }
                 }
-                draw();
-            }
-        } else if (action == 'disable') {
-            isDisabled = true;
-            $(factory)
-                .find('.eraseLink')
-                .prop('disabled', isDisabled);
-            $(factory)
-                .find('li')
-                .addClass('inactive');
-            $(factory)
-                .find('select')
-                .prop('disabled', isDisabled);
-            globalAlpha = 0.5;
-            draw();
-            return (that);
-        } else if (action == 'enable') {
-            isDisabled = false;
-            $(factory)
-                .find('.eraseLink')
-                .prop('disabled', isDisabled);
-            $(factory)
-                .find('li')
-                .removeClass('inactive');
-            $(factory)
-                .find('select')
-                .prop('disabled', isDisabled);
-            globalAlpha = 1;
-            draw();
-            return (factory);
-        } else {
-            onError = true;
-            console.log(errMsg + 'no action parameter provided (param 1)');
+            });
+            self.drawColumnsContentA();
+            self.drawColumnsContentB();
+            self.draw();
+        });
+    }
+    this.setError = function(message){
+        var self = this;
+        self.onError = true;
+        throw self.errMsg + message;
+    }
+    this.init = function(input){
+        var self = this;
+        if (!input) {
+            setError('no input options provided (param 2)');
         }
-    };
-}(jQuery));
+        self.data = JSON.parse(JSON.stringify(input));
+        self.FL_Factory_Lists = self.data;
+
+        if (self.FL_Original_Factory_Lists == null) {
+            self.FL_Original_Factory_Lists = JSON.parse(JSON.stringify( self.data ));
+        }
+        if (!self.data.Lists || self.data.Lists.length < 2) {
+            self.setError('provide at least 2 lists');
+        }
+    }
+    this.deduplicate = function(){
+        var self = this;
+        self.listsNr = self.data.Lists.length;
+
+        if (self.displayMode == 'original') {
+            for (let i = 0; i < self.listsNr; i++) {
+                let dict = {};
+                for (let j = 0; j < self.data.Lists[i].list.length; j++) {
+                    let val = self.data.Lists[i].list[j];
+                    if (!dict[val]) {
+                        dict[val] = 1;
+                    } else {
+                        dict[val] += 1;
+                        self.data.Lists[i].list[j] += '(' + dict[val] + ')';
+                    }
+                }
+            }
+        } else if (self.displayMode == 'alternateView') {
+            if (!self.data.Lists[0].keyName || !self.data.Lists[1].keyName) {
+                self.setError('no input options provided (param 2)');
+            }
+        }
+    }
+    this.changeSelects = function(){
+        var self = this;
+        $(self.selector)
+        .find('.FL-left select')
+        .trigger('change')
+        .css('border', 'none')
+        .css('appearance', 'none')
+        .attr('disabled', 'true');
+
+        $(self.selector)
+        .find('.FL-right select')
+        .trigger('change')
+        .css('border', 'none')
+        .css('appearance', 'none')
+        .attr('disabled', 'true');
+    }
+    this.manageExistingLinks = function(){
+        var self = this;
+        if (self.data.existingLinks) {
+            self.linksByName = self.data.existingLinks;
+            var tablesAB = self.chosenListA + '|' + self.chosenListB;
+            self.linksByName.forEach(function (x) {
+                x.tables = tablesAB;
+            });
+        }
+    }
+    this.manageResize= function(){
+        var self = this;
+        $(window).resize(function () {
+            self.canvasWidth = $(self.selector).find('.FL-main .FL-mid').width();
+            self.$canvas.width = self.canvasWidth;
+            $('#' + self.canvasId).css('width', self.canvasWidth + 'px');
+            self.draw();
+        });
+    }
+    this.eraseLinks = function(){
+        var self = this;
+        self.linksByName.length = 0;
+        self.draw();
+    }
+    this.getLinks = function(){
+        var self = this;
+        if (!self.onError) {
+            var isMandatoryError = false;
+            let links = null;
+            var errorMessage = self.mandatoryErrorMessage + ' : ';
+            var fieldInErrorName = '';
+            self.mandatories.forEach(function (m, i) {
+                if (!isMandatoryError) {
+                    var match = self.linksByName.filter(function (link) {
+                        return link.to == m;
+                    });
+                    if (match.length == 0) {
+                        isMandatoryError = true;
+                        fieldInErrorName = m;
+                    }
+                }
+            });
+            if (isMandatoryError) {
+                return {
+                    'error': true,
+                    'errorMessage': errorMessage + fieldInErrorName,
+                    'links': []
+                };
+            } else {
+                links = [];
+                self.linksByName.forEach(function (x) {
+                    links.push({
+                        from: x.from,
+                        to: x.to
+                    });
+                });
+                return {
+                    'error': false,
+                    'errorMessage': '',
+                    'links': links
+                };
+            }
+        } else {
+            return [];
+    }
+}
+this.changeParameters = function(input){
+    var self = this;
+    if (!self.onError) {
+       if (input) {
+        var options = JSON.parse(JSON.stringify(input));
+        if (options.className) {
+            self.className = options.className;
+        }
+        if(options.whiteSpace){
+            self.whiteSpace = options.whiteSpace;
+            
+            self.$leftDiv.css("white-space",self.whiteSpace);
+            self.$rightDiv.css("white-space",self.whiteSpace);
+            
+            self.ListHeights1 = [];
+            
+            $(self.$ulLeft).find('li').each(function (i, li) {
+                var val = computeListHeight(li);
+                self.ListHeights1.push(val);
+            });
+            
+            self.ListHeights2 = [];
+
+            $(self.$ulRight).find('li').each(function (i, li) {
+                var val = computeListHeight(li);
+                self.ListHeights2 .push(val);
+            });
+           
+        }
+        if (options.lineStyle) {
+            self.lineStyle = options.lineStyle;
+        }
+        if (options.lineColor) {
+            self.lineColor = options.lineColor;
+        }
+        if (options.handleColor) {
+            self.handleColor = options.handleColor.split(',');
+        }
+        if (options.associationMode) {
+            let unicityTokenA = '';
+            let unicityTokenB = '';
+            let formerAssociation = associationMode;
+            self.associationMode = options.associationMode;
+            if (self.associationMode == 'oneToOne' && formerAssociation == 'manyToMany') {
+                let unicityDict = {};
+                for (var i = self.linksByName.length - 1; i >= 0; i--) {
+                    unicityTokenA = self.linksByName[i].tables + '_A_' + self.linksByName[i]['from'];
+                    unicityTokenB = self.linksByName[i].tables + '_B_' + self.linksByName[i]['to'];
+                    let doDelete = false;
+                    if (!unicityDict[unicityTokenA]) {
+                        unicityDict[unicityTokenA] = true;
+                    } else {
+                        doDelete = true;
+                    }
+                    if (!unicityDict[unicityTokenB]) {
+                        unicityDict[unicityTokenB] = true;
+                    } else {
+                        doDelete = true;
+                    }
+                    if (doDelete) {
+                        self.linksByName.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
+    self.draw();
+}
+}
+this.enable = function(doEnable){
+    var self = this;
+    self.isDisabled = !doEnable;
+
+    $(self.$root)
+        .find('.eraseLink')
+        .prop('disabled', self.isDisabled);
+
+     if(doEnable) {
+        $(self.$root)
+        .find('li')
+        .removeClass('inactive');
+     }else{
+        $(self.$root)
+        .find('li')
+        .addClass('inactive');
+     }  
+
+    $(self.$root)
+        .find('select')
+        .prop('disabled', self.isDisabled);
+
+    self.globalAlpha = self.isDisabled ? 0.5 : 1;
+
+    self.draw();
+
+    }
+}
+// utils
 
 function LM_allowDrop(ev) {
     ev.preventDefault();
@@ -1102,24 +1199,39 @@ function LM_drop(ev) {
         src = src.data;
     }
     let $target = $(ev.target);
-    let dest = {};
-    dest.name = $target.parent().attr('data-name');
-    dest.col = $target.parent().parent().attr('data-col');
-    dest.offset = $target.parent().attr('data-offset');
-    if (src.col == dest.col && src.offset != dest.offset && src.name != dest.name) {
-        FL_Factory_Lists.Lists.forEach(function (x) {
-            if (x.name == src.col) {
-                let indexA = x.list.indexOf(src.name);
-                let indexB = x.list.indexOf(dest.name);
-                if (indexA != -1 && indexB != -1) {
-                    let temp = x.list[indexA];
-                    x.list[indexA] = x.list[indexB];
-                    x.list[indexB] = temp;
-                }
-            }
+    let $root = $target.closest(".fieldsLinker").parent();
+    let selector = "#" + $root.attr("id");
+    let factory = null;
+    if($root.length==1){
+      let oneMemory =  fieldsLinkerMemory.filter(function(x,i){
+            return x.selector == selector;
         });
-        $('body').trigger('LM_Message_Redraw');
+        if(oneMemory.length >0){
+            factory = oneMemory[0].factory;
+        }
+
+        if (factory != null) {
+            let dest = {};
+            dest.name = $target.parent().attr('data-name');
+            dest.col = $target.parent().parent().attr('data-col');
+            dest.offset = $target.parent().attr('data-offset');
+            if (src.col == dest.col && src.offset != dest.offset && src.name != dest.name) {
+                factory.work.FL_Factory_Lists.Lists.forEach(function (x) {
+                    if (x.name == src.col) {
+                        let indexA = x.list.indexOf(src.name);
+                        let indexB = x.list.indexOf(dest.name);
+                        if (indexA != -1 && indexB != -1) {
+                            let temp = x.list[indexA];
+                            x.list[indexA] = x.list[indexB];
+                            x.list[indexB] = temp;
+                        }
+                    }
+                });
+                $($root).trigger('LM_Message_Redraw');
+            }
+        }
     }
+
 }
 
 function is_touch_device() { // from bolmaster2 - stackoverflow
