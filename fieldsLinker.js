@@ -103,6 +103,7 @@ function FieldsLinker(selector){
     this.canvasCtx = null;
     this.canvasWidth = 0;
     this.canvasHeight = 0;
+    this.canvasPtr = null;
     this.mandatoryErrorMessage = 'This field is mandatory';
     this.mandatoryTooltips = true;
     this.onError = false;
@@ -188,60 +189,62 @@ function FieldsLinker(selector){
         });
     }
    this.makeLink = function (infos) {
-        var tablesAB = chosenListA + '|' + chosenListB;
+        var self = this;
+        var tablesAB = self.chosenListA + '|' + self.chosenListB;
         var already = false;
-        var test = linksByName.filter(function (x) {
+        var test = self.linksByName.filter(function (x) {
             return x.tables == tablesAB && x.to == infos.nameB && x.from == infos.nameA;
         });
         if (test.length > 0) already = true;
         if (!already) {
-            if (associationMode == 'oneToOne') {
-                for (var i = linksByName.length - 1; i >= 0; i--) {
-                    if (linksByName[i].tables == tablesAB && linksByName[i].to == infos.nameB) {
-                        linksByName.splice(i, 1);
+            if (self.associationMode == 'oneToOne') {
+                for (var i = self.linksByName.length - 1; i >= 0; i--) {
+                    if (self.linksByName[i].tables == tablesAB && self.linksByName[i].to == infos.nameB) {
+                        self.linksByName.splice(i, 1);
                     }
                 }
 
-                for (var i = linksByName.length - 1; i >= 0; i--) {
-                    if (linksByName[i].tables == tablesAB && linksByName[i].from == infos.nameA) {
-                        linksByName.splice(i, 1);
+                for (var i = self.linksByName.length - 1; i >= 0; i--) {
+                    if (self.linksByName[i].tables == tablesAB && self.linksByName[i].from == infos.nameA) {
+                        self.linksByName.splice(i, 1);
                     }
                 }
             }
-            linksByName.push({
+            self.linksByName.push({
                 'tables': tablesAB,
                 'from': infos.nameA,
                 'to': infos.nameB
             });
-            $('body').trigger({
+            $(self.$root).trigger({
                 type: 'fieldLinkerUpdate',
                 what: 'addLink'
             });
         }
-        draw();
+        self.draw();
     }
     this.eraseLinkA = function (nameA) {
-        var tablesAB = chosenListA + '|' + chosenListB;
-        for (var i = linksByName.length - 1; i >= 0; i--) {
-            if (linksByName[i].tables == tablesAB && linksByName[i].from == nameA) {
-                linksByName.splice(i, 1);
+        var self = this;
+        var tablesAB = self.chosenListA + '|' + self.chosenListB;
+        for (var i = self.linksByName.length - 1; i >= 0; i--) {
+            if (self.linksByName[i].tables == tablesAB && self.linksByName[i].from == nameA) {
+                self.linksByName.splice(i, 1);
             }
         }
-        draw();
-        $('body').trigger({
+        self.draw();
+        $(self.$root).trigger({
             type: 'fieldLinkerUpdate',
             what: 'removeLink'
         });
     }
     this.eraseLinkB = function (nameB) {
-        var tablesAB = chosenListA + '|' + chosenListB;
-        for (var i = linksByName.length - 1; i >= 0; i--) {
-            if (linksByName[i].tables == tablesAB && linksByName[i].to == nameB) {
-                linksByName.splice(i, 1);
+        var tablesAB = self.chosenListA + '|' + self.chosenListB;
+        for (var i = self.linksByName.length - 1; i >= 0; i--) {
+            if (self.linksByName[i].tables == tablesAB && self.linksByName[i].to == nameB) {
+                self.linksByName.splice(i, 1);
             }
         }
-        draw();
-        $('body').trigger({
+        self.draw();
+        $(self.$root).trigger({
             type: 'fieldLinkerUpdate',
             what: 'removeLink'
         });
@@ -836,9 +839,10 @@ function FieldsLinker(selector){
             });
         self.canvasWidth = w;
         self.canvasHeight = h;
-        self.$canvas.width = self.canvasWidth;
-        self.$canvas.height = self.canvasHeight;
-        self.canvasCtx = document.getElementById(self.canvasId).getContext('2d');
+        self.canvasPtr = document.getElementById(self.canvasId);
+        self.canvasPtr.width = self.canvasWidth;
+        self.canvasPtr.height = self.canvasHeight;
+        self.canvasCtx = self.canvasPtr.getContext("2d");
     }
     this.getTouchPos = function (e) {
         var rect = self.$canvas.getBoundingClientRect();
@@ -1026,7 +1030,7 @@ function FieldsLinker(selector){
         var self = this;
         $(window).resize(function () {
             self.canvasWidth = $(self.selector).find('.FL-main .FL-mid').width();
-            self.$canvas.width = self.canvasWidth;
+            self.canvasPtr.width = self.canvasWidth;
             $('#' + self.canvasId).css('width', self.canvasWidth + 'px');
             self.draw();
         });
