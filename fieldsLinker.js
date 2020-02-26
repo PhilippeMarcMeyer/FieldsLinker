@@ -30,7 +30,8 @@ let fieldsLinkerMemory = [];
                     fieldsLinkerMemory.push({"selector":factory.selector,"factory":factory});
                 }
             }
-            factory.work.init(input)
+            factory.work.init(input);
+            factory.work.deduplicate();
             factory.work.setGlobalRedraw();
             factory.work.readUserPreferences();
             factory.work.fillChosenLists(); 
@@ -778,7 +779,7 @@ function FieldsLinker(selector){
                 }
                 self.move.offsetB = $(this).data('offset');
                 self.move.nameB = $(this).data('name');
-                var infos = JSON.parse(JSON.stringify(move));
+                var infos = JSON.parse(JSON.stringify(self.move));
                 self.move = null;
                 self.makeLink(infos);
             }
@@ -845,33 +846,35 @@ function FieldsLinker(selector){
         self.canvasCtx = self.canvasPtr.getContext("2d");
     }
     this.getTouchPos = function (e) {
-        var rect = self.$canvas.getBoundingClientRect();
+        var self = this;
+        var rect = self.canvasPtr.getBoundingClientRect();
         return {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
     }
     this.drawImmediate = function (e) {
-        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+        var self = this;
+        self.canvasCtx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
         // we redraw all the existing links
-        draw();
-        canvasCtx.beginPath();
+        self.draw();
+        self.canvasCtx.beginPath();
         // we draw the new would-be link
-        var _from = move.offsetA;
-        var color = handleColor[_from % handleColor.length];
-        canvasCtx.fillStyle = 'white';
-        canvasCtx.strokeStyle = color;
+        var _from = self.move.offsetA;
+        var color = self.handleColor[_from % self.handleColor.length];
+        self.canvasCtx.fillStyle = 'white';
+        self.canvasCtx.strokeStyle = color;
         var Ax = 0;
-        var Ay = ListHeights1[_from];
+        var Ay = self.ListHeights1[_from];
         // mouse position relative to the canvas
         //var Bx = e.offsetX;
         //var By = e.offsetY;
-        var relativePosition = getTouchPos(e);
+        var relativePosition = self.getTouchPos(e);
         var Bx = relativePosition.x;
         var By = relativePosition.y;
-        canvasCtx.moveTo(Ax, Ay);
-        canvasCtx.lineTo(Bx, By);
-        canvasCtx.stroke();
+        self.canvasCtx.moveTo(Ax, Ay);
+        self.canvasCtx.lineTo(Bx, By);
+        self.canvasCtx.stroke();
 
     }
     this.setListeners = function () {
@@ -945,7 +948,7 @@ function FieldsLinker(selector){
                     });
                     self.listA = x.list;
                 }
-                if (x.name == chosenListB) {
+                if (x.name == self.chosenListB) {
                     self.listB = x.list;
                     if (x.mandatories != undefined) {
                         self.mandatories = x.mandatories;
@@ -1180,7 +1183,6 @@ this.enable = function(doEnable){
     }
 }
 // utils
-
 function LM_allowDrop(ev) {
     ev.preventDefault();
 }
@@ -1237,6 +1239,7 @@ function LM_drop(ev) {
     }
 
 }
+
 
 function is_touch_device() { // from bolmaster2 - stackoverflow
     var prefixes = ' -webkit- -moz- -o- -ms- '.split(' ');
