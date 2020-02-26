@@ -238,6 +238,7 @@ function FieldsLinker(selector){
         });
     }
     this.eraseLinkB = function (nameB) {
+        var self = this;
         var tablesAB = self.chosenListA + '|' + self.chosenListB;
         for (var i = self.linksByName.length - 1; i >= 0; i--) {
             if (self.linksByName[i].tables == tablesAB && self.linksByName[i].to == nameB) {
@@ -422,6 +423,7 @@ function FieldsLinker(selector){
             });
     }
     this.createFilterDiv = function (listIndex) {
+        var self = this;
         if ($('.FL-filter-' + listIndex).length > 0) {
             return false;
         }
@@ -1102,14 +1104,14 @@ this.changeParameters = function(input){
             self.ListHeights1 = [];
             
             $(self.$ulLeft).find('li').each(function (i, li) {
-                var val = computeListHeight(li);
+                var val =  self.computeListHeight(li);
                 self.ListHeights1.push(val);
             });
             
             self.ListHeights2 = [];
 
             $(self.$ulRight).find('li').each(function (i, li) {
-                var val = computeListHeight(li);
+                var val =  self.computeListHeight(li);
                 self.ListHeights2 .push(val);
             });
            
@@ -1126,7 +1128,7 @@ this.changeParameters = function(input){
         if (options.associationMode) {
             let unicityTokenA = '';
             let unicityTokenB = '';
-            let formerAssociation = associationMode;
+            let formerAssociation = self.associationMode;
             self.associationMode = options.associationMode;
             if (self.associationMode == 'oneToOne' && formerAssociation == 'manyToMany') {
                 let unicityDict = {};
