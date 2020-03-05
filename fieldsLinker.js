@@ -126,7 +126,7 @@ function FieldsLinker(selector){
     this.hideLink = false;
     this.isTouchScreen = is_touch_device();
     this.mobileClickIt = false;
-
+    this.buttonFilter = "Filter";
 
     this.draw = function () {
         var self = this;
@@ -289,6 +289,9 @@ function FieldsLinker(selector){
         if(self.isTouchScreen){
             self.mobileClickIt = true;
         }
+        if(self.data.options.buttonFilter){
+            self.buttonFilter = self.data.options.buttonFilter;
+        }
     }
     this.fillChosenLists = function () {
         var self = this;
@@ -430,17 +433,18 @@ function FieldsLinker(selector){
         // création des éléments
         let divFilter = $('<div></div>').addClass('FL-filter-' + listIndex);
         let input = $('<input type="text" name="filter' + listIndex + '" id="iFilter' + listIndex + '" />');
-        let searchBtn = $('<button role="button" type="button" class="btn btn-small">' + data.options.buttonFilter + '</button>');
+        let searchBtn = $('<button role="button" type="button" class="btn btn-small">' + self.buttonFilter + '</button>');
         input.appendTo(divFilter);
         searchBtn.appendTo(divFilter);
 
-        // fonction de filtre à proprement parler
+        // PM : I want to change all that and hide the LI tags instead, recalculate the heights and don't show links on hidden elements
         searchBtn.click(function (e) {
             // réaffectation de la liste originelle
-            FL_Factory_Lists.Lists[listIndex] = JSON.parse(JSON.stringify(FL_Original_Factory_Lists.Lists[listIndex]));
+            self.FL_Factory_Lists.Lists[listIndex] = JSON.parse(JSON.stringify(self.FL_Original_Factory_Lists.Lists[listIndex]));
             var filter = $(e.target).parent().find('input').val();
-            FL_Factory_Lists.Lists[listIndex].list = filterList(FL_Factory_Lists.Lists[listIndex].list, filter, FL_Factory_Lists.Lists[listIndex].keysFilter);
-            $(factory).fieldsLinker('init', FL_Factory_Lists);
+            self.FL_Factory_Lists.Lists[listIndex].list = self.filterList(self.FL_Factory_Lists.Lists[listIndex].list, filter, self.FL_Factory_Lists.Lists[listIndex].keysFilter);
+            self.init(self.FL_Factory_Lists);
+           // $(factory).fieldsLinker('init', self.FL_Factory_Lists);
         });
         return divFilter;
     }
@@ -462,13 +466,15 @@ function FieldsLinker(selector){
     }
     this.computeListHeight = function (li) {
         // outerHeight(true) adds margins too, full step is simply full outerHeight / 2 between li siblings
-        var step = Math.ceil($(li).outerHeight(true) / 2);
-        return  Math.floor($(li).position().top + step);
+        if(!$(li).hasClass('hidden')){
+            var step = Math.ceil($(li).outerHeight(true) / 2);
+            return  Math.floor($(li).position().top + step);
+        }
     }
     this.drawColumnsContentA = function () {
         var self = this;
         if (self.data.Lists[0].filter) {
-            $filterDiv1 = createFilterDiv(0);
+            $filterDiv1 = self.createFilterDiv(0);
             if ($filterDiv1 != false) {
                 $filterDiv1.appendTo(self.$leftDiv);
             }
@@ -691,7 +697,7 @@ function FieldsLinker(selector){
    this.drawColumnsContentB = function () {
        var self = this;
         if (self.data.Lists[1].filter) {
-            $filterDiv2 = createFilterDiv(1);
+            $filterDiv2 = self.createFilterDiv(1);
             if ($filterDiv2 != false) {
                 $filterDiv2.appendTo(self.$rightDiv);
             }
