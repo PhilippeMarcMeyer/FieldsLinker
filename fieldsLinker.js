@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.92
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.96
+   
+   v 0.96 : Remove filter option and alternateview : thses modes have nothing to do with the original concept 
    v 0.95 : rewritten for multiples instances in mind
    v 0.92 : introducing new option : whiteSpace
    v 0.91 : fix mobileClickIt if set, add selected css classes, automatic mobileClickIt on touch devices
@@ -121,12 +123,10 @@ function FieldsLinker(selector){
     this.isDisabled = false;
     this.globalAlpha = 1;
     this.mandatories = [];
-    this.displayMode = 'original';
     this.whiteSpace ="nowrap";
     this.hideLink = false;
     this.isTouchScreen = is_touch_device();
     this.mobileClickIt = false;
-    this.buttonFilter = "Filter";
 
     this.draw = function () {
         var self = this;
@@ -140,23 +140,10 @@ function FieldsLinker(selector){
             return x.tables == tablesAB;
         });
         links.forEach(function (item, i) {
-            var positionA = -1;
-            var positionB = -1;
-            if (self.displayMode == 'original') {
-                positionA = self.listA.indexOf(item.from);
-                positionB = self.listB.indexOf(item.to);
-            } else if (self.displayMode == 'alternateView') {
-                self.listA.forEach(function (x, j) {
-                    if (x[self.keyNameA] == item.from) {
-                        positionA = j;
-                    }
-                });
-                self.listB.forEach(function (x, j) {
-                    if (x[self.keyNameB] == item.to) {
-                        positionB = j;
-                    }
-                });
-            }
+			
+			var positionA = self.listA.indexOf(item.from);
+			var positionB = self.listB.indexOf(item.to);
+
             if (positionB == -1 || positionA == -1) {
                 console.log('error link names unknown');
                 return;
@@ -266,17 +253,6 @@ function FieldsLinker(selector){
         if (self.data.options.lineColor) {
             self.lineColor = self.data.options.lineColor;
         }
-        if (self.data.options.displayMode) {
-            self.displayMode = self.data.options.displayMode;
-            if (self.displayMode != 'alternateView') {
-                self.displayMode = 'original';
-            }
-        }
-        if (self.displayMode == 'alternateView') {
-            if (self.data.options.displayModeHideKey) {
-                self.hideLink = self.data.options.displayModeHideKey;
-            }
-        }
         if (self.data.options.handleColor) {
             self.handleColor = self.data.options.handleColor.split(',');
         }
@@ -289,9 +265,7 @@ function FieldsLinker(selector){
         if(self.isTouchScreen){
             self.mobileClickIt = true;
         }
-        if(self.data.options.buttonFilter){
-            self.buttonFilter = self.data.options.buttonFilter;
-        }
+
     }
     this.fillChosenLists = function () {
         var self = this;
@@ -425,45 +399,6 @@ function FieldsLinker(selector){
                 'list-style': 'none'
             });
     }
-    this.createFilterDiv = function (listIndex) {
-        var self = this;
-        if ($('.FL-filter-' + listIndex).length > 0) {
-            return false;
-        }
-        // création des éléments
-        let divFilter = $('<div></div>').addClass('FL-filter-' + listIndex);
-        let input = $('<input type="text" name="filter' + listIndex + '" id="iFilter' + listIndex + '" />');
-        let searchBtn = $('<button role="button" type="button" class="btn btn-small">' + self.buttonFilter + '</button>');
-        input.appendTo(divFilter);
-        searchBtn.appendTo(divFilter);
-
-        // PM : I want to change all that and hide the LI tags instead, recalculate the heights and don't show links on hidden elements
-        searchBtn.click(function (e) {
-            // réaffectation de la liste originelle
-            self.FL_Factory_Lists.Lists[listIndex] = JSON.parse(JSON.stringify(self.FL_Original_Factory_Lists.Lists[listIndex]));
-            var filter = $(e.target).parent().find('input').val();
-            self.FL_Factory_Lists.Lists[listIndex].list = self.filterList(self.FL_Factory_Lists.Lists[listIndex].list, filter, self.FL_Factory_Lists.Lists[listIndex].keysFilter);
-            self.init(self.FL_Factory_Lists);
-           // $(factory).fieldsLinker('init', self.FL_Factory_Lists);
-        });
-        return divFilter;
-    }
-    this.filterList = function (list, filter, keysFilter) {
-        // en créer une nouvelle, pas de souci de ref
-        let re = RegExp(filter, 'i');
-        var newList = [];
-        list.forEach((item) => {
-            let found = false;
-            for (let i = 0;
-                (i < keysFilter.length && !found); i++) {
-                if (re.test(item[keysFilter[i]])) {
-                    newList.push(item);
-                    found = true;
-                }
-            }
-        });
-        return newList;
-    }
     this.computeListHeight = function (li) {
         // outerHeight(true) adds margins too, full step is simply full outerHeight / 2 between li siblings
         if(!$(li).hasClass('hidden')){
@@ -473,12 +408,7 @@ function FieldsLinker(selector){
     }
     this.drawColumnsContentA = function () {
         var self = this;
-        if (self.data.Lists[0].filter) {
-            $filterDiv1 = self.createFilterDiv(0);
-            if ($filterDiv1 != false) {
-                $filterDiv1.appendTo(self.$leftDiv);
-            }
-        }
+
         if (self.$ulLeft.length == 1) {
             self.$ulLeft.empty();
         } else {
@@ -505,20 +435,6 @@ function FieldsLinker(selector){
             var $li = $('<li></li>');
             let item = x;
             let id = x;
-            if (self.displayMode == 'alternateView') {
-                item = '<table style=\'width:100%;\'><tbody><tr>';
-                for (key in x) {
-                    if (key == self.keyNameA) {
-                        id = x[key];
-                        if (!self.hideLink) {
-                            item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
-                        }
-                    } else {
-                        item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
-                    }
-                }
-                item += '</tr></tbody></table>';
-            }
             $li
                 .appendTo(self.$ulLeft)
                 .attr('data-offset', i)
@@ -696,13 +612,6 @@ function FieldsLinker(selector){
     }
    this.drawColumnsContentB = function () {
        var self = this;
-        if (self.data.Lists[1].filter) {
-            $filterDiv2 = self.createFilterDiv(1);
-            if ($filterDiv2 != false) {
-                $filterDiv2.appendTo(self.$rightDiv);
-            }
-        }
-
         if (self.$ulRight.length == 1) {
             self.$ulRight.empty();
         } else {
@@ -720,30 +629,6 @@ function FieldsLinker(selector){
         self.listB.forEach(function (x, i) {
             let item = x;
             let id = x;
-            if (self.displayMode == 'alternateView') {
-                let nrItems = Object.keys(x).length;
-                if (hideLink) {
-                    nrItems--;
-                }
-                if (nrItems < 0) {
-                    nrItems = 1;
-                }
-                let percent = (100 / nrItems) + '%';
-
-                item = '<table style=\'width:100%;\'><tbody><tr>';
-                let sep = '';
-                for (key in x) {
-                    if (key == self.keyNameB) {
-                        id = x[key];
-                        if (!self.hideLink) {
-                            item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
-                        }
-                    } else {
-                        item += '<td style="width:' + percent + ';">' + x[key] + '</td>';
-                    }
-                }
-                item += '</tr></tbody></table>';
-            }
             var isMandatory = (self.mandatories.indexOf(x) != -1);
             var $li = $('<li></li>');
             $li
@@ -973,7 +858,8 @@ function FieldsLinker(selector){
         self.onError = true;
         throw self.errMsg + message;
     }
-    this.init = function(input){
+    this.init = function(input,onFilter){
+
         var self = this;
         if (!input) {
             setError('no input options provided (param 2)');
@@ -981,7 +867,7 @@ function FieldsLinker(selector){
         self.data = JSON.parse(JSON.stringify(input));
         self.FL_Factory_Lists = self.data;
 
-        if (self.FL_Original_Factory_Lists == null) {
+        if (!onFilter) {
             self.FL_Original_Factory_Lists = JSON.parse(JSON.stringify( self.data ));
         }
         if (!self.data.Lists || self.data.Lists.length < 2) {
@@ -992,24 +878,18 @@ function FieldsLinker(selector){
         var self = this;
         self.listsNr = self.data.Lists.length;
 
-        if (self.displayMode == 'original') {
-            for (let i = 0; i < self.listsNr; i++) {
-                let dict = {};
-                for (let j = 0; j < self.data.Lists[i].list.length; j++) {
-                    let val = self.data.Lists[i].list[j];
-                    if (!dict[val]) {
-                        dict[val] = 1;
-                    } else {
-                        dict[val] += 1;
-                        self.data.Lists[i].list[j] += '(' + dict[val] + ')';
-                    }
-                }
-            }
-        } else if (self.displayMode == 'alternateView') {
-            if (!self.data.Lists[0].keyName || !self.data.Lists[1].keyName) {
-                self.setError('no input options provided (param 2)');
-            }
-        }
+		for (let i = 0; i < self.listsNr; i++) {
+			let dict = {};
+			for (let j = 0; j < self.data.Lists[i].list.length; j++) {
+				let val = self.data.Lists[i].list[j];
+				if (!dict[val]) {
+					dict[val] = 1;
+				} else {
+					dict[val] += 1;
+					self.data.Lists[i].list[j] += '(' + dict[val] + ')';
+				}
+			}
+		}
     }
     this.changeSelects = function(){
         var self = this;

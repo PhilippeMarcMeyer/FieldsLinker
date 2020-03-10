@@ -207,7 +207,7 @@ input[type=radio]:before {
   
 	  
  <div id="fieldLinkerZone" style="max-width:800px;width:800px;" >
-	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v 0.95 : rewritten for multiples instances in mind
+	  <h5 style="display:inline-block">FieldsLinker</h5>&nbsp;v 0.96 : rewritten for multiples instances in mind
 	  <br/>New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins , make links more easily on touch devices just by clicking 
 	  <p>Allows to link elements of list A to elements of list B and returns the links in a js object</p>
 	  <ul class="presentation">
@@ -265,11 +265,6 @@ input[type=radio]:before {
 		<br /><br />
 		<div id="input"></div>
 
-		<p>2nde instance :</p>
-
-		<div class="bonds" id="second" style="display:block;">
-	
-		</div>
   </div>
   
   
@@ -283,22 +278,22 @@ input[type=radio]:before {
 	<script>  
 	var fieldLinks;
 	var inputOri;
-		$( document ).ready(function() {
+			$(document).ready(function () {
 				inputOri = {
-			    "localization":{
- 				},
-			    "options":{
-					"associationMode":"manyToMany", // oneToOne,manyToMany
-					"lineStyle":"square-ends",
-					"buttonErase":"Erase Links",
-					"displayMode" :"original",
-					"whiteSpace":$("input[name='whiteSpace']:checked").val(), //normal,nowrap,pre,pre-wrap,pre-line,break-spaces default => nowrap
-					"mobileClickIt":false
-				},
-					"Lists":[
+					"localization": {
+					},
+					"options": {
+						"associationMode": "manyToMany", // oneToOne,manyToMany
+						"lineStyle": "square-ends",
+						"buttonErase": "Erase Links",
+						"displayMode": "original",
+						"whiteSpace": $("input[name='whiteSpace']:checked").val(), //normal,nowrap,pre,pre-wrap,pre-line,break-spaces default => nowrap
+						"mobileClickIt": false
+					},
+					"Lists": [
 						{
-							"name":"Columns in files",
-							"list" : [
+							"name": "Columns in files",
+							"list": [
 								"firstName",
 								"lastName",
 								"phone",
@@ -311,13 +306,13 @@ input[type=radio]:before {
 							]
 						},
 						{
-							"name":"Available Fields",
-							"list" : [
+							"name": "Available Fields",
+							"list": [
 								"Company",
 								"jobTitle",
-								"adress",	
 								"adress",
-								"adress",								
+								"adress",
+								"adress",
 								"first_name",
 								"last_name",
 								"email_adress",
@@ -325,16 +320,15 @@ input[type=radio]:before {
 								"Pourcentage of france in the global market",
 
 							],
-							"mandatories" :[
+							"mandatories": [
 								"last_name",
 								"email_adress"
 							]
 						}
-						],
-
-					"existingLinks" : [{"from":"lastName","to":"last_name"},{"from":"firstName","to":"first_name"},{"from":"role","to":"jobTitle"}]
-			};
-			
+					],
+					"existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
+				};
+		
 	
 	 		$(".fieldLinkerSave").on("click",function(){
 				var results = fieldLinks.fieldsLinker("getLinks");
@@ -343,9 +337,7 @@ input[type=radio]:before {
 
 
 		  fieldLinks=$("#original").fieldsLinker("init",inputOri);
-		  var input2nd = JSON.parse(JSON.stringify(inputOri));
 		  
-		 var secondInstance = $("#second").fieldsLinker("init",input2nd);
 		});
 		
  

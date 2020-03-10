@@ -9,6 +9,10 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
+https://philippemarcmeyer.github.io/FieldsLinker/index.html
+
+### v0.96 : Removing filter option and alternateview 
+
 ### v0.95 : rewritten for multiples instances in mind
 
 ### v0.92
@@ -26,19 +30,8 @@ Fix `mobileClickIt` option:
 - mobileClickIt option is automatic on touch devices
 
 ### v0.90
-Canvas calulations fixes and other various fixes.
-
-Added the ability to have filters on top of columns and new related options (alternateView only) :
-```
-"options":{
-	"buttonFilter":"Filter", // value displayed on the filter button
-}
-"Lists":[{
-	"filter":true, // activate the filter on this column
-	"keysFilter": ["libelle"] // fields of the list where to find the searched string (Regex.test() behind the scenes)
-}]
-
-```
+Canvas calculations fixes and other various fixes.
+Filter mode (removed in v 0.96)
 
 ### v0.89 
 
@@ -46,51 +39,7 @@ Added the ability to have filters on top of columns and new related options (alt
 
 v 0.89 : Corrected a bug that corrupted the links array of objects detected by flartet on github
 
-v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects ar provided
-
-```
-			var input = {
-			    "localization":{
- 				},
-			    "options":{
-					"associationMode":"manyToMany", // oneToOne,manyToMany
-					"lineStyle":"square-ends",
-					"buttonErase":"Erase Links",
-					"displayMode" :"alternateView",
-					"displayModeHideKey" :true // default is false
-					},
-					"Lists":[
-						{
-							"name":"Students",
-							"keyName" : "Id",
-							"list" : [
-							   {"Id":1,"Name":"Scott","Address":"Albama"},
-							   {"Id":2,"Name":"Andrew","Address":"Alaska"}
-							]
-						},
-						{
-							"name":"Courses",
-							"keyName" : "CourseId",
-							"list" : [
-								{"CourseId":1,"CourseName":"Analytics"},
-								{"CourseId":2,"CourseName":"DataScience"},
-								{"CourseId":3,"CourseName":"JQuery"},
-								{"CourseId":4,"CourseName":"JavaScript"},
-								{"CourseId":5,"CourseName":"MVC"}
-							]
-						}
-						],
-					"existingLinks" : [{"from":1,"to":1},{"from":1,"to":2},{"from":1,"to":4},{"from":2,"to":1}]
-			};
-			
-		  fieldLinks=$("#alternateView").fieldsLinker("init",input);
-```
-
-See the demo for this new mode here : 
-https://philippemarcmeyer.github.io/FieldsLinker/indexTable.html
-
-Original mode is still here with MobileClickIt option to test: 
-https://philippemarcmeyer.github.io/FieldsLinker/index.html
+v 0.88 : New display mode : idea by Naveen nsirangu => show links between two "tables" linked by ids like a join in sql. instead of headers names, objects are provided (removed in v 0.96)
 
 v 0.87 : New option for touch devices {"mobileClickIt":true} : idea by Norman Tomlins => make links more easily on touch devices just by clicking 
 
