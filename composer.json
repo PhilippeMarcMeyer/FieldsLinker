@@ -1,0 +1,20 @@
+{
+    "name": "phillipemarkmeyer/fieldslinker",
+    "description": "Designed for matching files headers to database fields during the process importing. Allows drawing links between elements of 2 lists.",
+    "keywords": ["jquery", "plugins", "canvas", "list", "lines", "jquery-plugin"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Phillipe Marc Mayer",
+            "email": "pmg.meyer@gmail.com",
+            "homepage": "https://philippemarcmeyer.github.io",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/PhilippeMarcMeyer/FieldsLinker/issues",
+        "source": "https://github.com/PhilippeMarcMeyer/FieldsLinker",
+        "docs": "https://github.com/PhilippeMarcMeyer/FieldsLinker"
+    }
+}
