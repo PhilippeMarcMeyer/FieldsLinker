@@ -11,6 +11,8 @@ You can link on a one to one basis or on a one to many basis. Fields can be decl
 
 https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
+Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker
+
 ### v0.96 : Removing filter option and alternateview 
 
 ### v0.95 : rewritten for multiples instances in mind
