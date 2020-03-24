@@ -1,5 +1,5 @@
 {
-    "name": "phillipemarkmeyer/fieldslinker",
+    "name": "philippemarcmeyer/fieldslinker",
     "description": "Designed for matching files headers to database fields during the process importing. Allows drawing links between elements of 2 lists.",
     "keywords": ["jquery", "plugins", "canvas", "list", "lines", "jquery-plugin"],
     "type": "library",
