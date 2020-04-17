@@ -9,6 +9,13 @@ the jquery plugin allows you to draw and save links between the 2 lists
 
 You can link on a one to one basis or on a one to many basis. Fields can be declared as mandatory the result reporting an error in case there are not filled.
 
+Store previous links and headers to automaticaly recognize files
+reload links if you need it with the existingLinks property :
+
+exmaple :
+"existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
+
+
 https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
@@ -127,6 +134,7 @@ https://philippemarcmeyer.github.io/FieldsLinker/index.html
 							"Phone number"
 						]
 					}
+					"existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
 
 			};
 			
