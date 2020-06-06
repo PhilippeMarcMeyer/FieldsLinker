@@ -15,7 +15,8 @@ reload links if you need it with the existingLinks property :
 example :
 "existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
 
-FieldsLinker is not compatible with jquery 3.5
+*FieldsLinker is not compatible with jquery 3.5*
+
 I made it with jquery 2.2
 
 https://philippemarcmeyer.github.io/FieldsLinker/index.html
