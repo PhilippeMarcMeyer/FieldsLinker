@@ -17,6 +17,7 @@ let fieldsLinkerMemory = [];
     $.fn.fieldsLinker = function (action, input) {
         factory = this;
         if (action == 'init') {
+			factory.selector = factory[0];
             factory.work = new FieldsLinker(factory.selector);
             if(fieldsLinkerMemory.length == 0){
                 fieldsLinkerMemory.push({"selector":factory.selector,"factory":factory});
@@ -734,9 +735,11 @@ function FieldsLinker(selector){
         self.canvasWidth = w;
         self.canvasHeight = h;
         self.canvasPtr = document.getElementById(self.canvasId);
-        self.canvasPtr.width = self.canvasWidth;
-        self.canvasPtr.height = self.canvasHeight;
-        self.canvasCtx = self.canvasPtr.getContext("2d");
+        if(self.canvasPtr){
+            self.canvasPtr.width = self.canvasWidth;
+            self.canvasPtr.height = self.canvasHeight;
+            self.canvasCtx = self.canvasPtr.getContext("2d");
+        }
     }
     this.getTouchPos = function (e) {
         var self = this;
