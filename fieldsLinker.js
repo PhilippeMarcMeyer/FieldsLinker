@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 0.96
-   
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.0
+
+   v 1.00 : jquery 3.5 compatibility
    v 0.96 : Remove filter option and alternateview : thses modes have nothing to do with the original concept 
    v 0.95 : rewritten for multiples instances in mind
    v 0.92 : introducing new option : whiteSpace

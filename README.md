@@ -15,13 +15,11 @@ reload links if you need it with the existingLinks property :
 example :
 "existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
 
-*FieldsLinker is not compatible with jquery 3.5*
-
-*I made it with jquery 2.2*
-
-https://philippemarcmeyer.github.io/FieldsLinker/index.html
+https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
+
+### v1.00 : Jquery 3.5 Compatibility
 
 ### v0.96 : Removing filter option and alternateview 
 
@@ -96,7 +94,7 @@ and on chromium the canvas zone (between the 2 lists) is selected during the dra
 
 v0.01 : first commit : todo => parameters should not be necessary cellHeight,List1Width,canvasWidth,List2Width and should be calculated
 
-https://philippemarcmeyer.github.io/FieldsLinker/index.html
+https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
 <pre>
 	var fieldLinks;
