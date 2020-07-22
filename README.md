@@ -15,6 +15,78 @@ reload links if you need it with the existingLinks property :
 example :
 "existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
 
+## Usage
+
+* param 1 : action
+* param 2 : input 
+
+### Available actions :
+
+* init : 
+<pre>
+ fieldLinks=$("#bonds").fieldsLinker("init",input);
+</pre>
+
+Example of input : 
+
+<pre>
+
+var input =	{
+				"options": {
+					"lineStyle": "square-ends",
+					"buttonErase": "Erase Links"
+				},
+				"listA": {
+					"name": "columns in files",
+					"list": [
+						"firstName",
+						"lastName",
+						"phone",
+						"email",
+						"role",
+						"Birthday",
+						"Adress",
+						"Sales"
+					]
+				},
+				"listB": {
+					"name": "Fields available",
+					"list": [
+						"Id",
+						"Company",
+						"jobTitle",
+						"adress 1",
+						"adress 2",
+						"first_name",
+						"last_name",
+						"email_adress",
+						"Phone number"
+					]
+				},
+				"existingLinks": [{
+					"from": "lastName",
+					"to": "last_name"
+				}, {
+					"from": "firstName",
+					"to": "first_name"
+				}, {
+					"from": "role",
+					"to": "jobTitle"
+				}]
+
+			}
+</pre>
+
+Available input.options : 
+* options.className : you may change the default className ('fieldsLinker') by another class you provide
+* options.whiteSpace : default is 'nowrap' => you can change it to 'normal' to allow lists element to go to the next line (usefull if you have long names separated by spaces or ][)
+* lineStyle : 'straight' or 'square-ends' : will change the way the links are drawn between the items of the 2 lists, default is 'straight'
+* associationMode : 'oneToOne' or 'manyToMany' : allow links to be set on a one to one relationship or many to many
+* handleColor : your own colors défault is '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'
+* mobileClickIt : true or false : simpler mode on mobile device where you click on item A and then click on item B to set the link (mobileClickIt option is automatic on touch devices)
+
+... to be continued ...
+
 https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
@@ -96,48 +168,3 @@ v0.01 : first commit : todo => parameters should not be necessary cellHeight,Lis
 
 https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
-<pre>
-	var fieldLinks;
-		$( document ).ready(function() {
-				var input = {
-			    "options":{
-					"byName" : true,
-					"lineStyle":"square-ends",
-					"buttonErase":"Erase Links",
-					
-				},
-				"listA":
-					{
-						"name":"columns in files",
-						"list" : [
-							"firstName",
-							"lastName",
-							"phone",
-							"email",
-							"role",
-							"Birthday",
-							"Adress",
-							"Sales"
-						]
-					},
-				"listB":
-					{
-						"name":"Fields available",
-						"list" : [
-							"Id",
-							"Company",
-							"jobTitle",
-							"adress 1",	
-							"adress 2",	
-							"first_name",
-							"last_name",
-							"email_adress",
-							"Phone number"
-						]
-					}
-					"existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
-
-			};
-			
-		  	fieldLinks=$("#bonds").fieldsLinker("init",input);
-</pre>
