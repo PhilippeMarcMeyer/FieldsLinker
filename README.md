@@ -77,15 +77,30 @@ var input =	{
 			}
 </pre>
 
-Available input.options : 
+Available input.options for "init" action : 
 * options.className : you may change the default className ('fieldsLinker') by another class you provide
 * options.whiteSpace : default is 'nowrap' => you can change it to 'normal' to allow lists element to go to the next line (usefull if you have long names separated by spaces or ][)
 * lineStyle : 'straight' or 'square-ends' : will change the way the links are drawn between the items of the 2 lists, default is 'straight'
 * associationMode : 'oneToOne' or 'manyToMany' : allow links to be set on a one to one relationship or many to many
-* handleColor : your own colors défault is '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'
+* handleColor : your own colors default is '#CF0000,#00AD00,#0000AD,#FF4500,#00ADAD,#AD00AD,#582900,#FFCC00,#000000,#33FFCC'
 * mobileClickIt : true or false : simpler mode on mobile device where you click on item A and then click on item B to set the link (mobileClickIt option is automatic on touch devices)
 
-... to be continued ...
+
+* changeParameters : 
+example :
+<pre>
+fieldLinks.fieldsLinker("changeParameters",{"whiteSpace":"normal"});
+</pre>
+where the second parameter holds an options object to modify the original input.options attribute
+
+* eraseLinks : drop all links
+
+* getLinks : returns all the links
+
+* disable : disables the whole stuff
+
+* enable : enables it again
+
 
 https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
@@ -94,6 +109,13 @@ Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker 
 ### v1.00 : Jquery 3.5 Compatibility
 
 ### v0.96 : Removing filter option and alternateview 
+Sorry for the contributors : Fieldlinkers was diverging to much from the original intent and use case : to be a filter between a file to import and a database 
+
+I made another plugin LinksMaker, which works the same but can allow more than 2 lists (you then compare lists two by two, by selecting them) 
+
+this plugin works much the same as Fieldlinkers and the links syntax is the same
+
+this one could evolve in any direction !
 
 ### v0.95 : rewritten for multiples instances in mind
 
