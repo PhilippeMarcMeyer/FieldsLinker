@@ -15,6 +15,8 @@ reload links if you need it with the existingLinks property :
 example :
 "existingLinks": [{ "from": "lastName", "to": "last_name" }, { "from": "firstName", "to": "first_name" }, { "from": "role", "to": "jobTitle" }]
 
+Side note : If FieldsLinker interest you, but you need it for other use case than file importation, check LinksMaker plugin which works the same but can allow more than 2 lists (you then compare lists two by two, by selecting them). this plugin works much the same as Fieldslinker and this one could evolve in any direction that meets your needs.
+
 ## Usage
 
 * param 1 : action
@@ -113,7 +115,7 @@ Sorry for the contributors : Fieldlinkers was diverging to much from the origina
 
 I made another plugin LinksMaker, which works the same but can allow more than 2 lists (you then compare lists two by two, by selecting them) 
 
-this plugin works much the same as Fieldlinkers and the links syntax is the same
+this plugin works much the same as Fieldslinker 
 
 this one could evolve in any direction !
 
