@@ -104,7 +104,7 @@ where the second parameter holds an options object to modify the original input.
 * enable : enables it again
 
 
-https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
+https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.02
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
 
