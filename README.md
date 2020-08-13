@@ -115,7 +115,7 @@ Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker 
 ### v1.00 : Jquery 3.5 Compatibility
 
 ### v0.96 : Removing filter option and alternateview 
-Sorry for the contributors : Fieldlinkers was diverging to much from the original intent and use case : to be a filter between a file to import and a database 
+Sorry for the contributors : Fieldlinkers was diverging too much from the original intent and use case : to be a filter between a file to import and a database 
 
 I made another plugin LinksMaker, which works the same but can allow more than 2 lists (you then compare lists two by two, by selecting them) 
 
