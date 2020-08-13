@@ -1,6 +1,7 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.01
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.02
 
+   v 1.02 : Improvement : adding an id to the root dom element if not provided
    v 1.01 : Bug correction : the manual sorting by drap and drop now works
    v 1.00 : jquery 3.5 compatibility
    v 0.96 : Remove filter option and alternateview : theses modes have nothing to do with the original concept 
@@ -14,11 +15,20 @@
 */
 let fieldsLinkerMemory = [];
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+  
 ;(function($) {
     $.fn.fieldsLinker = function (action, input) {
         factory = this;
         if (action == 'init') {
-			factory.selector = factory[0];
+            factory.selector = factory[0];
+            
+            if(!factory.selector.id){
+                factory.selector.id = "FLinkerId_" + getRandomInt(1024000000);
+            }
+            
             factory.work = new FieldsLinker(factory.selector);
             if(fieldsLinkerMemory.length == 0){
                 fieldsLinkerMemory.push({"selector":factory.selector,"factory":factory});
