@@ -1,9 +1,9 @@
-/* eslint-disable no-unused-vars */
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.0
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.01
 
+   v 1.01 : Bug correction : the manual sorting by drap and drop now works
    v 1.00 : jquery 3.5 compatibility
-   v 0.96 : Remove filter option and alternateview : thses modes have nothing to do with the original concept 
+   v 0.96 : Remove filter option and alternateview : theses modes have nothing to do with the original concept 
    v 0.95 : rewritten for multiples instances in mind
    v 0.92 : introducing new option : whiteSpace
    v 0.91 : fix mobileClickIt if set, add selected css classes, automatic mobileClickIt on touch devices
@@ -1098,11 +1098,11 @@ function LM_drop(ev) {
     }
     let $target = $(ev.target);
     let $root = $target.closest(".fieldsLinker").parent();
-    let selector = "#" + $root.attr("id");
+    let currentDropId = $root.attr("id");
     let factory = null;
     if($root.length==1){
       let oneMemory =  fieldsLinkerMemory.filter(function(x,i){
-            return x.selector == selector;
+            return x.selector.id == currentDropId;
         });
         if(oneMemory.length >0){
             factory = oneMemory[0].factory;
