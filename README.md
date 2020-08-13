@@ -108,6 +108,8 @@ https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
 
+### v1.01 : Bug correction : the manual sorting by drap and drop now works
+
 ### v1.00 : Jquery 3.5 Compatibility
 
 ### v0.96 : Removing filter option and alternateview 
