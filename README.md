@@ -104,9 +104,12 @@ where the second parameter holds an options object to modify the original input.
 * enable : enables it again
 
 
-https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.02
+https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
+
+
+### v1.03 : bug fix : no drag and drop when FieldsLinker is disabled
 
 ### v1.02 : Improvement : adding an id to the root dom element if not provided
 

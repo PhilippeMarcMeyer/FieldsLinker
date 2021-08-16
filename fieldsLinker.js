@@ -1,6 +1,7 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.02
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.03
 
+   v 1.03 : bug fix : no drag and drop when FieldsLinker is disabled
    v 1.02 : Improvement : adding an id to the root dom element if not provided
    v 1.01 : Bug correction : the manual sorting by drap and drop now works
    v 1.00 : jquery 3.5 compatibility
@@ -1067,11 +1068,15 @@ this.enable = function(doEnable){
      if(doEnable) {
         $(self.$root)
         .find('li')
-        .removeClass('inactive');
+        .removeClass('inactive')
+        .find('div')
+        .prop('draggable',true);
      }else{
         $(self.$root)
         .find('li')
-        .addClass('inactive');
+        .addClass('inactive')
+        .find('div')
+        .prop('draggable',false);
      }  
 
     $(self.$root)
@@ -1086,6 +1091,8 @@ this.enable = function(doEnable){
 }
 // utils
 function LM_allowDrop(ev) {
+  //  ev.dataTransfer.dropEffect = "none"; // dropping is not allowed
+  console.log(ev.currentTarget);
     ev.preventDefault();
 }
 
