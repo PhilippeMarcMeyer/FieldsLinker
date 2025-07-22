@@ -1,6 +1,6 @@
 {
   "name": "FieldsLinker",
-  "version": "1.03",
+  "version": "1.0.3",
   "description": "vanilla js plugin to transform a select tag into a nice drop-down",
   "homepage": "https://philippemarcmeyer.github.io/#FieldsLinker",
   "repository": {
