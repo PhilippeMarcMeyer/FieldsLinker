@@ -197,5 +197,5 @@ and on chromium the canvas zone (between the 2 lists) is selected during the dra
 
 v0.01 : first commit : todo => parameters should not be necessary cellHeight,List1Width,canvasWidth,List2Width and should be calculated
 
-https://philippemarcmeyer.github.io/FieldsLinker/index.html?v=1.00
+https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
