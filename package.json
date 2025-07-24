@@ -1,7 +1,7 @@
 {
  "name": "fieldslinker",
-  "version": "1.0.3",
-  "description": "vanilla js plugin to transform a select tag into a nice drop-down",
+  "version": "1.0.4",
+  "description": "jquery plugin to match file columns with DB columns by drawing arrows",
   "homepage": "https://philippemarcmeyer.github.io/#FieldsLinker",
   "repository": {
     "type": "git",

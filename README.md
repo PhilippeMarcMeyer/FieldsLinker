@@ -108,6 +108,7 @@ https://philippemarcmeyer.github.io/FieldsLinker/index.html
 
 Also available on https://packagist.org/packages/philippemarcmeyer/fieldslinker ++++
 
+### v1.04 : Just a wording fix for npm
 
 ### v1.03 : bug fix : no drag and drop when FieldsLinker is disabled
 

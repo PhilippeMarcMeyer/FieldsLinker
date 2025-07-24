@@ -1,6 +1,7 @@
 /*
-   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.03
+   https://github.com/PhilippeMarcMeyer/FieldsLinker v 1.04
 
+   v 1.04 : Just a wording fix for npm
    v 1.03 : bug fix : no drag and drop when FieldsLinker is disabled
    v 1.02 : Improvement : adding an id to the root dom element if not provided
    v 1.01 : Bug correction : the manual sorting by drap and drop now works
